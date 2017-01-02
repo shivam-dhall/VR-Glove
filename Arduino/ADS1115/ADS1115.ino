@@ -19,10 +19,10 @@ void loop(void)
   adc2 = ads.readADC_SingleEnded(2);
   adc3 = ads.readADC_SingleEnded(3);
   float current = adc0/const_dianzu;
-  int dz0 = (adc1-adc0)/current;
-  int dz1 = (adc2-adc1)/current;
-  int dz2 = (adc3-adc2)/current;
-  int dz3 = (22170-adc3)/current;
+  int dz0 = (adc2-adc3);
+  int dz1 = (adc1-adc2);
+  int dz2 = (adc0-adc1);
+  int dz3 = (22170-adc0);
 
   JY901.GetAcc();
   Serial.print("Acc:");
@@ -30,15 +30,14 @@ void loop(void)
   Serial.print(" ");
   Serial.print((float)JY901.stcAcc.a[1]/32768*16);
   Serial.print(" ");Serial.println((float)JY901.stcAcc.a[2]/32768*16);
- 
-
-  Serial.print((adc1-adc0));
+  
+  Serial.print(dz0);
   Serial.print(" ");
-  Serial.print((adc2-adc1));
+  Serial.print(dz1);
   Serial.print(" ");
-  Serial.print((adc3-adc2));
+  Serial.print(dz2);
   Serial.print(" ");
-  Serial.println((22170-adc3));
+  Serial.println(dz3);
   
   //Voltage = (adc0 * 0.1875)/1000;
   
@@ -48,5 +47,5 @@ void loop(void)
   //Serial.println(Voltage, 7);  
   //Serial.println();
   
-  delay(100);
+  delay(1000);
 }

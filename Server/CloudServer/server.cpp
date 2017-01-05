@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <iostream>
+//#include <syswait.h>
 using namespace std;
 
 #define MYPORT  8080
@@ -62,11 +63,15 @@ int main()
 
     while(1)
     {
-        memset(buffer,0,sizeof(buffer));
-        int len = recv(conn, buffer, sizeof(buffer),0);
-        if(strcmp(buffer,"exit\n")==0)
-            break;
-        cout<<buffer<<endl;
+		char sendBuf[20] = "abcde";
+		send(conn, sendBuf, strlen(sendBuf) + 1, 0);
+		usleep(100000);
+
+        //memset(buffer,0,sizeof(buffer));
+        //int len = recv(conn, buffer, sizeof(buffer),0);
+        //if(strcmp(buffer,"exit\n")==0)
+            //break;
+        //cout<<buffer<<endl;
         //fputs(buffer, stdout);
         //send(conn, buffer, len, 0);
     }

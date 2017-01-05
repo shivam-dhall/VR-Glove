@@ -1,4 +1,0 @@
-sceneSetups:
-- path: Assets/GoogleVR/Scenes/Scene.unity
-  isLoaded: 1
-  isActive: 1

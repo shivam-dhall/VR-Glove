@@ -14,10 +14,28 @@ using namespace std;
 
 #define MYPORT  8080
 #define QUEUE   20
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
+
+void SendData(char* data, int type,int s){
+	char a[5];
+	int size = strlen(data);
+	a[0] = (char)((size >> 24) & 0xFF);
+	a[1] = (char)((size >> 16) & 0xFF);
+	a[2] = (char)((size >> 8) & 0xFF);
+	a[3] = (char)(size & 0xFF);
+	a[4] = (char)(type & 0xFF);
+	int ret = size;
+	send(s, a, 5, 0);
+	send(s, data, strlen(data), 0);
+}
+
+
 
 int main()
 {
+
+	cout << ":"<<char(0) << endl;
+
     //printf("11111");
     cout<<"22222"<<endl;
     ///定义sockfd
@@ -60,11 +78,38 @@ int main()
 
     cout<<"end connect"<<endl;
 
+	char sendBuf[4096];
+	for (int i = 0; i < 4096; ++i)
+		sendBuf[i] = 'a';
+
+	int cnt = 0;
+
+	char a[4101];
+	int size = 4096;
+	a[0] = (char)((size >> 24) & 0xFF);
+	a[1] = (char)((size >> 26) & 0xFF);
+	a[2] = (char)((size >> 8) & 0xFF);
+	a[3] = (char)(size & 0xFF);
+	a[4] = (char)(1 & 0xFF); 
+	//cout << ((size>>56) & 0xFF) << endl;
+
+	cout << (int)a[0] << " " << (int)a[1] << " " << (int)a[2] << " " << (int)a[3] << " " << (int)a[4] << endl;
+
+	for (int i = 5; i < 4101; ++i)
+		a[i] = 'a';
+
 
     while(1)
     {
-		char sendBuf[20] = "abcde";
-		send(conn, sendBuf, strlen(sendBuf) + 1, 0);
+		//SendData(sendBuf, 1, conn);
+		send(conn, a,4101 , 0);//strlen(sendBuf) + 1
+		//for (int i = 0; i < 32768; ++i)
+			//sendBuf[i] = (char)('a'+(cnt++)%26);
+		//cout << sendBuf[32767] << endl;
+		//char sendBuf[20] = "abcde";
+		//send(conn, makeDat(4096,1), strlen(sendBuf) + 1, 0);
+
+		//SendData(sendBuf, 1,conn);
 		usleep(100000);
 
         //memset(buffer,0,sizeof(buffer));

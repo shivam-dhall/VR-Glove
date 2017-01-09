@@ -28,13 +28,14 @@ namespace TestClient
     /// MyTcpIpClient 提供在Net TCP_IP 协议上基于消息的客户端 
     public class MyTcpIpClient : System.ComponentModel.Component
     {
-        private int bufferSize = 2048;
+        private int bufferSize = 4096;
         private string tcpIpServerIP = "101.200.45.113";
         private int tcpIpServerPort = 8080;
         private Socket ClientSocket = null;
         private ManualResetEvent connectDone = new ManualResetEvent(false);
         private ManualResetEvent sendDone = new ManualResetEvent(false);
-
+        private bool isOnceFinished = true;
+        
 
         private void ConnectCallback(IAsyncResult ar)
         {
@@ -82,71 +83,67 @@ namespace TestClient
                     StateObject state = (StateObject)ar.AsyncState;
                     handler = state.workSocket;
                     int bytesRead = handler.EndReceive(ar);
-                    Console.WriteLine("cnt:"+state.cnt);
+                    Console.WriteLine("byteread:" + bytesRead);
                     int readCnt = 0;//the length of data which has been read in this callback func
 
                     if (bytesRead > 0)
                     {
-                        //Console.WriteLine("read:"+bytesRead);
                         if (state.cnt + bytesRead < 5)
                         {
-                            //Console.WriteLine("11111111111");
                             for (int i = state.cnt; i < bytesRead + state.cnt; ++i)
                             {
                                 state.lt_record[i] = state.buffer[i - state.cnt];
-                                Console.WriteLine(state.lt_record[i]);
                             }
 
                             readCnt += bytesRead;
                         }
                         else
                         {
-                            if (state.packSize == -1)
+                            if (state.packSize == -2)
                             {
-                                Console.WriteLine("2222222222222");
                                 for (int i = state.cnt; i < 5; ++i)
                                 {
                                     state.lt_record[i] = state.buffer[i - state.cnt];
-                                    Console.WriteLine(state.lt_record[i]);
                                 }
-
                                 state.packSize = (int)((state.lt_record[0] & 0xFF << 24)
                                                     | ((state.lt_record[1] & 0xFF) << 16)
                                                     | ((state.lt_record[2] & 0xFF) << 8)
                                                     | ((state.lt_record[3] & 0xFF)));
                                 state.dataType = (int)state.lt_record[4];
                                 readCnt += (5 - state.cnt);
-                               // Console.WriteLine(state.lt_record[0] + " " + state.lt_record[1] + " " + state.lt_record[2] + " ");
-                                Console.WriteLine(state.packSize + " " + state.dataType);
+                                
                             }
 
                         }
-                        Console.WriteLine("byt--xxx:" + bytesRead);
                         state.cnt += bytesRead;
-                        Console.WriteLine("cnt--wwww:" + state.cnt);
+                        Console.Write(state.buffer[readCnt] + " ");
                         while (readCnt < bytesRead)
                         {
-                            
-                            //Console.Write(state.buffer[readCnt]);  
                             readCnt++;
                         }
-                        Console.WriteLine(readCnt);
-
+                        Console.Write(state.buffer[readCnt - 1]);
+                        Console.WriteLine("  buffer[4095]:" + state.buffer[4096 - 1]);
+                        if (state.packSize != -2)
+                            state.restSize = 5 + state.packSize - state.cnt;
+                        Array.Clear(state.buffer, 0, state.buffer.Length);
                     }
                     else
                     {
-                        Console.WriteLine("----end-----");
                         throw (new Exception("读入的数据小于1bit"));
                     }
-                    if (handler.Connected == true && (state.packSize == -1 || (state.cnt - 5 < state.packSize)))
+                    if (handler.Connected == true && (state.packSize == -2 || state.restSize > 0))
                     {
-                        handler.BeginReceive(state.buffer, 0, bufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-                        Console.WriteLine("****" + state.packSize);
+                        int size = (state.restSize > bufferSize ? bufferSize : state.restSize);
+                        handler.BeginReceive(state.buffer, 0, size, 0, new AsyncCallback(ReceiveCallback), state);
                     }
                     else
                     {
-                        Console.WriteLine("kkkkkkkkkkk:"+state.packSize+" "+state.cnt);
+                        this.isOnceFinished = true;
+                        Console.WriteLine("-------------------");
+
                     }
+
+
                 }
             }
             catch (Exception e)
@@ -259,16 +256,12 @@ namespace TestClient
             {
                 connectDone.WaitOne();
                 StateObject Cstate = new StateObject(bufferSize, ClientSocket);
-                ClientSocket.BeginReceive(Cstate.buffer, 0, bufferSize, 0,
+                if (this.isOnceFinished)
+                {
+                    this.isOnceFinished = false;
+                    ClientSocket.BeginReceive(Cstate.buffer, 0, bufferSize, 0,
                     new AsyncCallback(ReceiveCallback), Cstate);
-                //Console.Write("receive "+cnt+": ");
-                //for (int i = 0; i < 10; ++i)
-                //    Console.Write(Cstate.buffer[i]);
-                //Console.Write(".......");
-                //for (int i = bufferSize - 10; i < bufferSize; ++i)
-                //    Console.Write(Cstate.buffer[i]);
-                Console.WriteLine("----------");
-                //cnt = 0;
+                }
                 Thread.Sleep(100);
             }
         }
@@ -371,9 +364,13 @@ namespace TestClient
         {
             buffer = new byte[bufferSize];
             workSocket = WorkSocket;
+            packSize = -2;
+            restSize = -1;
+            dataType = -1;
+            cnt = 0;
         }
 
-        public byte []lt_record = new byte[5];//record length,type buffer
+        public byte[] lt_record = new byte[5];//record length,type buffer
 
         /// 缓存
         public byte[] buffer = null;
@@ -383,10 +380,11 @@ namespace TestClient
         public Stream Datastream = new MemoryStream();
 
 
-        public long packSize = -1;/// 数据包大小//-1表示还未收数据
-        public int dataType = -1;
+        public int packSize;/// 数据包大小//-1表示还未收数据
+        public int restSize;
+        public int dataType;
 
-        public int cnt = 0;/// 已接受的数据长度
+        public int cnt;/// 已接受的数据长度
     }
 
     /// 接收数据事件

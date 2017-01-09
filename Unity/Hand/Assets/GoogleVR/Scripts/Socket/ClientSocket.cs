@@ -16,13 +16,16 @@ namespace clinet
     /// MyTcpIpClient 提供在Net TCP_IP 协议上基于消息的客户端 
     public class MyTcpIpClient : System.ComponentModel.Component
     {
-        private int bufferSize = 2048;
+        private int bufferSize = 4096;
         private string tcpIpServerIP = "101.200.45.113";
         private int tcpIpServerPort = 8080;
         private Socket ClientSocket = null;
         private ManualResetEvent connectDone = new ManualResetEvent(false);
         private ManualResetEvent sendDone = new ManualResetEvent(false);
-        
+        private bool isOnceFinished = true;
+        private byte[] data = new byte[23456];
+        int pos = 0;
+        public bool isConnect = false;
 
         private void ConnectCallback(IAsyncResult ar)
         {
@@ -30,7 +33,7 @@ namespace clinet
             {
                 Socket client = (Socket)ar.AsyncState;
                 client.EndConnect(ar);
-
+                isConnect = true;
             }
             catch (Exception e)
             {
@@ -58,7 +61,8 @@ namespace clinet
             }
         }
 
-        /// 数据接收处理,bytesRead是这次接收到的包的一部分数据size，如果没接收完，继续调用自己，直到没有数据
+
+        /// 数据接收处理//////// ,bytesRead是这次接收到的包的一部分数据size，如果没接收完，继续调用自己，直到没有数据
         private void ReceiveCallback(IAsyncResult ar)
         {
             Socket handler = null;
@@ -68,140 +72,66 @@ namespace clinet
                 {
                     StateObject state = (StateObject)ar.AsyncState;
                     handler = state.workSocket;
-
                     int bytesRead = handler.EndReceive(ar);
+                    int readCnt = 0;//the length of data which has been read in this callback func
 
                     if (bytesRead > 0)
                     {
-                        int ReadPiont = 0;
-                        while (ReadPiont < bytesRead)
+                        if (state.cnt + bytesRead < 5)
                         {
-                            if (state.Cortrol == 0 && ReadPiont < bytesRead)
+                            for (int i = state.cnt; i < bytesRead + state.cnt; ++i)
                             {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = (bi1 << 24) & 0xff000000;
-                                state.packSize = bi1;
-                                ReadPiont++;
-                                state.Cortrol = 1;
+                                state.lt_record[i] = state.buffer[i - state.cnt];
                             }
 
-                            if (state.Cortrol == 1 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = (bi1 << 16) & 0x00ff0000;
-                                state.packSize = state.packSize + bi1;
-                                ReadPiont++;
-                                state.Cortrol = 2;
-                            }
-
-                            if (state.Cortrol == 2 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = (bi1 << 8) & 0x0000ff00;
-                                state.packSize = state.packSize + bi1;
-                                ReadPiont++;
-                                state.Cortrol = 3;
-                            }
-
-                            if (state.Cortrol == 3 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = bi1 & 0xff;
-                                state.packSize = state.packSize + bi1 - 4;
-                                ReadPiont++;
-                                state.Cortrol = 4;
-                            }
-
-
-                            if (state.Cortrol == 4 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = (bi1 << 24) & 0xff000000;
-                                state.residualSize = bi1;
-                                ReadPiont++;
-                                state.Cortrol = 5;
-                                state.packSize -= 1;
-                            }
-
-                            if (state.Cortrol == 5 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = (bi1 << 16) & 0x00ff0000;
-                                state.residualSize = state.residualSize + bi1;
-                                ReadPiont++;
-                                state.Cortrol = 6;
-                                state.packSize -= 1;
-                            }
-
-                            if (state.Cortrol == 6 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = (bi1 << 8) & 0x0000ff00;
-                                state.residualSize = state.residualSize + bi1;
-                                ReadPiont++;
-                                state.Cortrol = 7;
-                                state.packSize -= 1;
-                            }
-                            if (state.Cortrol == 7 && ReadPiont < bytesRead)
-                            {
-                                long bi1 = state.buffer[ReadPiont];
-                                bi1 = bi1 & 0xff;
-                                state.residualSize = state.residualSize + bi1;
-                                state.Datastream.SetLength(0);
-                                state.Datastream.Position = 0;
-
-                                ReadPiont++;
-                                state.Cortrol = 8;
-                                state.packSize -= 1;
-                            }
-
-                            if (state.Cortrol == 8 && ReadPiont < bytesRead)
-                            {
-                                int bi1 = bytesRead - ReadPiont;
-                                int bi2 = (int)(state.residualSize - state.Datastream.Length);
-                                if (bi1 >= bi2)
-                                {
-                                    state.Datastream.Write(state.buffer, ReadPiont, bi2);
-                                    ReadPiont += bi2;
-                                    OnInceptEvent(new InceptEventArgs(state.Datastream, handler));
-                                    state.Cortrol = 9;
-                                    state.packSize -= bi2;
-                                }
-                                else
-                                {
-                                    state.Datastream.Write(state.buffer, ReadPiont, bi1);
-                                    ReadPiont += bi1;
-                                    state.packSize -= bi1;
-                                }
-                            }
-
-
-                            if (state.Cortrol == 9 && ReadPiont < bytesRead)
-                            {
-                                int bi1 = bytesRead - ReadPiont;
-                                if (bi1 < state.packSize)
-                                {
-                                    state.packSize = state.packSize - bi1;
-                                    ReadPiont += bi1;
-                                }
-                                else
-                                {
-                                    state.Cortrol = 0;
-                                    ReadPiont += (int)state.packSize;
-                                }
-                            }
+                            readCnt += bytesRead;
                         }
+                        else
+                        {
+                            if (state.packSize == -2)
+                            {
+                                for (int i = state.cnt; i < 5; ++i)
+                                {
+                                    state.lt_record[i] = state.buffer[i - state.cnt];
+                                }
+                                state.packSize = (int)((state.lt_record[0] & 0xFF << 24)
+                                                    | ((state.lt_record[1] & 0xFF) << 16)
+                                                    | ((state.lt_record[2] & 0xFF) << 8)
+                                                    | ((state.lt_record[3] & 0xFF)));
+                                state.dataType = (int)state.lt_record[4];
+                                readCnt += (5 - state.cnt);
+                                //data = new byte[state.packSize];
+                            }
+
+                        }
+                        //int pos = state.cnt - 5;
+                        state.cnt += bytesRead;
+                        while (readCnt < bytesRead)
+                        {
+                            //readCnt++;
+                            data[pos++] = state.buffer[readCnt++];
+                        }
+                        if (state.packSize != -2)
+                            state.restSize = 5 + state.packSize - state.cnt;
+                        Array.Clear(state.buffer, 0, state.buffer.Length);
                     }
                     else
                     {
                         throw (new Exception("读入的数据小于1bit"));
                     }
-                    if (handler.Connected == true)
+                    if (handler.Connected == true && (state.packSize == -2 || state.restSize > 0))
                     {
-                        handler.BeginReceive(state.buffer, 0, bufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-                        Console.WriteLine("接收字节长度【{0}】", state.buffer.Length);
-                        long size = state.residualSize;
+                        int size = (state.restSize > bufferSize ? bufferSize : state.restSize);
+                        handler.BeginReceive(state.buffer, 0, size, 0, new AsyncCallback(ReceiveCallback), state);
                     }
+                    else
+                    {
+                        pos = 0;
+                        this.isOnceFinished = true;
+                        Index.SetData(data);
+                    }
+
+
                 }
             }
             catch (Exception e)
@@ -212,7 +142,7 @@ namespace clinet
         }
 
         /// 连接服务器
-        public void Conn()
+        public void Connect()
         {
             try
             {
@@ -281,7 +211,7 @@ namespace clinet
                 while (n > 0)
                 {
                     ClientSocket.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), ClientSocket);
-                    Console.WriteLine("发送字节长度【{0}】", byteData.Length);
+                    //Console.WriteLine("发送字节长度【{0}】", byteData.Length);
                     sendDone.WaitOne();
                     byteData = new byte[bufferSize];
                     n = Astream.Read(byteData, 0, byteData.Length);
@@ -304,20 +234,40 @@ namespace clinet
             //
         }
 
+        public void ReceiveData()
+        {
+            if (isConnect)
+            {
+                connectDone.WaitOne();
+                
+                StateObject Cstate = new StateObject(bufferSize, ClientSocket);
+                if (this.isOnceFinished)
+                {
+                    this.isOnceFinished = false;
+                    ClientSocket.BeginReceive(Cstate.buffer, 0, bufferSize, 0,
+                    new AsyncCallback(ReceiveCallback), Cstate);
+                }
+            }
+        }
+
         /// 构造
         public MyTcpIpClient()
         {
-            Conn();
+            //Connect();
 
-            //连接完成后开始循环接收服务端返回数据
-            while (true)
-            {
-                connectDone.WaitOne();
-                StateObject Cstate = new StateObject(bufferSize, ClientSocket);
-                ClientSocket.BeginReceive(Cstate.buffer, 0, bufferSize, 0,
-                    new AsyncCallback(ReceiveCallback), Cstate);
-                Thread.Sleep(100);
-            }
+            ////连接完成后开始循环接收服务端返回数据
+            //while (true)
+            //{
+            //    connectDone.WaitOne();
+            //    StateObject Cstate = new StateObject(bufferSize, ClientSocket);
+            //    if (this.isOnceFinished)
+            //    {
+            //        this.isOnceFinished = false;
+            //        ClientSocket.BeginReceive(Cstate.buffer, 0, bufferSize, 0,
+            //        new AsyncCallback(ReceiveCallback), Cstate);
+            //    }
+            //    Thread.Sleep(100);
+            //}
         }
 
         //#region Component Designer generated code
@@ -418,7 +368,13 @@ namespace clinet
         {
             buffer = new byte[bufferSize];
             workSocket = WorkSocket;
+            packSize = -2;
+            restSize = -1;
+            dataType = -1;
+            cnt = 0;
         }
+
+        public byte[] lt_record = new byte[5];//record length,type buffer
 
         /// 缓存
         public byte[] buffer = null;
@@ -426,12 +382,13 @@ namespace clinet
         public Socket workSocket = null;
         /// 数据流
         public Stream Datastream = new MemoryStream();
-        /// 剩余大小
-        public long residualSize = 0;
-        /// 数据包大小
-        public long packSize = 0;
-        /// 计数器
-        public int Cortrol = 0;
+
+
+        public int packSize;/// 数据包大小//-1表示还未收数据
+        public int restSize;
+        public int dataType;
+
+        public int cnt;/// 已接受的数据长度
     }
 
     /// 接收数据事件
@@ -479,7 +436,6 @@ namespace clinet
     }
     /// 错误委托
     public delegate void ErrorEvent(object sender, ErrorEventArgs e);
-
 
 
 }

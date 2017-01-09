@@ -46,13 +46,15 @@ public:
 		///定义sockfd
 	    server_sockfd = socket(AF_INET,SOCK_STREAM, 0);
 
+	    int on = 1;
+		int ret = setsockopt(server_sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) );
 
 	    server_sockaddr.sin_family = AF_INET;
 	    server_sockaddr.sin_port = htons(PORT);
 	    server_sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	    ///bind，成功返回0，出错返回-1
-	    if(bind(server_sockfd,(struct sockaddr *)&server_sockaddr,sizeof(server_sockaddr))==-1)
+	    if((ret = bind(server_sockfd,(struct sockaddr *)&server_sockaddr,sizeof(server_sockaddr)))==-1)
 	    {
 	        perror("bind");
 	        exit(1);

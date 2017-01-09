@@ -124,7 +124,7 @@ public:
 
 
 	//copy src's [0,size) to dst[start,start+size)
-	void myStrcopy(char *dst, char* src, int start, int size){
+	void myStrcopy(char *dst, char* &src, int start, int size){
 		int cnt = 0;
 		while (cnt < start){
 			++dst;

@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <iostream>
+#include <pthread.h>
 //#include <syswait.h>
 #include "MySocket.h"
 using namespace std;
@@ -41,29 +42,46 @@ using namespace std;
 //	send(s, a, 5, 0);
 //	send(s, data, size, 0);
 //}
+MySocket *sock;
 
-
-
-
+void *threadFunc1(void *arg){
+	while (1){		
+		sock->BeginWork();
+		usleep(10000);
+	}
+}
 
 int main()
 {
-	MySocket *sock = MySocket::getInstance();
+	sock = MySocket::getInstance();
 	sock->OpenPort();
-	if (sock->WaitClient())
-		cout << "a client connect" << endl;
-	char a[23456];
-	cout << "***" << endl;
-	a[0] = 'z';
-	for (int i = 1; i < 23455; ++i)
-		a[i] = 'a';
-	a[23455] = 'y';
-	cout << "-----" << endl;
-	usleep(200000);
-	while (1){
-	sock->SendData(a, 23456, 1);
-	usleep(100000);
+	sock->WaitClient();
+	sock->WaitClient();
+		
+	pthread_t tid1;
+	int err;
+	err = pthread_create(&tid1, NULL, threadFunc1, NULL);//创建线程
+	if (err != 0)
+	{
+		printf("pthread_create error:%s\n", strerror(err));
+		exit(-1);
 	}
+	while (1){
+		cout << "***********" << endl;
+		usleep(1000000);
+	}
+	//char a[23456];
+	//cout << "***" << endl;
+	//a[0] = 'z';
+	//for (int i = 1; i < 23455; ++i)
+	//	a[i] = 'a';
+	//a[23455] = 'y';
+	//cout << "-----" << endl;
+	//usleep(200000);
+	//while (1){
+	//sock->SendData(a, 23456, 1);
+	//usleep(100000);
+	//}
 	//char ttt1[100];
 	//ttt1[0] = 'a';
 	//char ttt2[5];

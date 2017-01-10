@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <iostream>
+
 using namespace std;
 
 #define BUFFER_SIZE 4096
@@ -19,18 +20,25 @@ struct sockaddr_in client_addr;
 ///定义sockaddr_in
 struct sockaddr_in server_sockaddr;
 
+struct sockaddr_in client_addr1;
+///定义sockaddr_in
+struct sockaddr_in server_sockaddr1;
+
 class MySocket{
 public:
 
 	MySocket(){//:port(PORT),bufferSize(BUFFER_SIZE){
 		port = PORT;
 		bufferSize = BUFFER_SIZE;
+		bufferSize1 = BUFFER_SIZE;
 		server_sockfd = -1;
-		conn = -1;
+		connUnity = -1;
+
 	}
 
 	void setBufferSize(int size){
 		bufferSize = size;
+		bufferSize1 = size;
 	}
 
 	static MySocket *getInstance(){
@@ -40,9 +48,25 @@ public:
 		return mySocket;
 	}
 
+	void BeginWork(){
+		cout << "-----------" << endl;
+		///int len = _ReceiveData(connArduino);
+		int len = recv(connArduino, receiveData, bufferSize1,0);
+		int packSize = (int)((receiveData[0] & 0xFF << 24)
+                       | ((receiveData[1] & 0xFF) << 16)
+                       | ((receiveData[2] & 0xFF) << 8)
+                       | ((receiveData[3] & 0xFF)));
+		cout<<"receive:"<<len<<"data from arduino,"<<packSize<<endl;
+		cout<<"data[7]:"<<receiveData[7]<<" data[691]:"<<receiveData[11]<<endl;
+	}
+
+
+
 	void OpenPort(int port = PORT){
 		buffer = new char[bufferSize];
 		memset(buffer,0,sizeof(buffer));
+		receiveData = new char[bufferSize1];
+		memset(receiveData,0,sizeof(receiveData));
 		///定义sockfd
 	    server_sockfd = socket(AF_INET,SOCK_STREAM, 0);
 
@@ -74,11 +98,11 @@ public:
 
 	    ///成功返回非负描述字，出错返回-1
 	    
-
 	}
 
+
 	bool WaitClient(){
-		conn = accept(server_sockfd, (struct sockaddr*)&client_addr, &length);
+		int conn = accept(server_sockfd, (struct sockaddr*)&client_addr, &length);
 		if(conn<0)
 	    {
 	        perror("connect error");
@@ -86,11 +110,64 @@ public:
 	    }
 
 	    cout<<"connect success"<<endl;
+	    char a[2];
+	    int len = recv(conn, a, 2,0);
+	    cout<<"len:"<<len<<endl;
+	    if(a[0]=='1'){
+	    	connArduino = conn;
+	    	cout << "arduino client connect" << endl;
+	    }
+	    else if(a[0]=='2'){
+	    	connUnity = conn;
+	    	cout << "unity connect" << endl;
+	    }
 		return true;
 	}
 
 
-	void SendData(char* data,int size, int type){
+	~MySocket(){
+		if(connUnity!=-1)
+			close(connUnity);
+		if(connArduino!=-1)
+			close(connUnity);
+		if(server_sockfd!=-1)
+			close(server_sockfd);
+
+		if(buffer!=NULL)
+			delete []buffer;
+
+	}
+
+private:
+
+	
+	int _ReceiveData(int conn){
+		memset(receiveData,0,sizeof(receiveData));
+		int l = 0;
+		char * index = receiveData;
+		while(l<5){
+			int len = recv(conn,index,bufferSize1,0);
+			l+=len;
+			index +=len;
+		}
+		int packSize = (int)((receiveData[0] & 0xFF << 24)
+                               | ((receiveData[1] & 0xFF) << 16)
+                               | ((receiveData[2] & 0xFF) << 8)
+                               | ((receiveData[3] & 0xFF)));
+		cout<<"packSize:"<<packSize<<endl;
+		while(l-4<packSize){
+			int rest = packSize-l+4;
+			int len = recv(conn,index,(rest<bufferSize1?rest:bufferSize1),0);
+			l+=len;
+			index +=len;
+		}
+
+		return l;
+
+	}
+
+
+	void _SendData(int conn,char* data,int size, int type){
 		if(conn == -1){
 			cout<<"not connect"<<endl;
 			return;
@@ -139,24 +216,17 @@ public:
 		}
 	}
 
-	~MySocket(){
-		if(conn!=-1)
-			close(conn);
-		if(server_sockfd!=-1)
-			close(server_sockfd);
-		if(buffer!=NULL)
-			delete []buffer;
-
-	}
-
-private:
 	int bufferSize;
 	int port;
 	char* buffer;
-	int conn;
+	int connUnity;
 	int server_sockfd;
 	static MySocket *mySocket;
 	socklen_t length;
+
+	char* receiveData;
+	int bufferSize1;
+	int connArduino;
 };
 
 MySocket* MySocket::mySocket = NULL;

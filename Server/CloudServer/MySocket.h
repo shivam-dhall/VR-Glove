@@ -42,22 +42,55 @@ public:
 	}
 
 	static MySocket *getInstance(){
+
 		if(mySocket == NULL){
 			mySocket = new MySocket();
 		}
 		return mySocket;
 	}
 
+	void Print(){
+		cout<<"data:";
+		for(int i=0;i<22;++i){
+			cout<<data[i]<<",";
+		}
+		cout<<endl;
+	}
+
 	void BeginWork(){
 		cout << "-----------" << endl;
 		///int len = _ReceiveData(connArduino);
+		memset(receiveData,0,sizeof(receiveData));
 		int len = recv(connArduino, receiveData, bufferSize1,0);
-		int packSize = (int)((receiveData[0] & 0xFF << 24)
-                       | ((receiveData[1] & 0xFF) << 16)
-                       | ((receiveData[2] & 0xFF) << 8)
-                       | ((receiveData[3] & 0xFF)));
-		cout<<"receive:"<<len<<"data from arduino,"<<packSize<<endl;
-		cout<<"data[7]:"<<receiveData[7]<<" data[691]:"<<receiveData[11]<<endl;
+		cout<<"receive:"<<len<<"data from arduino,"<<endl;
+		// for(int i=0;i<66;++i)
+		// 	cout<<(int)receiveData[i]<<" ";
+		cout<<endl;
+		if(len == 66){
+			for(int i=0; i<66; i = i+3){
+				if(receiveData[i] == receiveData[i+2])
+					receiveData[i] -= receiveData[i+2];
+				if(receiveData[i+1] == receiveData[i+2])
+					receiveData[i+1] -= receiveData[i+2];
+				//cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
+				short dd = (short)((receiveData[i]<<8)|(receiveData[i+1]));
+				int d = dd;
+				
+				cout<<d<<",";
+				if((i/3>=0&&i/3<=2)||(i/3>=13&&i/3<=15))
+					data[i/3] = ((float)d)*16/32768;
+				else if(i/3>=16&&i/3<=18)
+					data[i/3] = (float)d*2000/32768;
+				else if(i/3>=19&&i/3<=21)
+					data[i/3] = (float)d*180/32768;
+				else if(i/3>=3&&i/3<=8)
+					;
+				else if(i/3>=9&&i/3<=12)
+					;
+			}
+		}
+		cout<<endl;
+		Print();
 	}
 
 
@@ -227,6 +260,7 @@ private:
 	char* receiveData;
 	int bufferSize1;
 	int connArduino;
+	float data[22];
 };
 
 MySocket* MySocket::mySocket = NULL;

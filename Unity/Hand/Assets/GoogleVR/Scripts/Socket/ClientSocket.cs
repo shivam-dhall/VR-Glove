@@ -33,7 +33,15 @@ namespace clinet
             {
                 Socket client = (Socket)ar.AsyncState;
                 client.EndConnect(ar);
+                //////
+                connectDone.WaitOne();
+                byte[] a = new byte[2];
+                a[0] = (byte)'2';
+                a[1] = (byte)'\0';
+                Send(a);
+                ///////
                 isConnect = true;
+
             }
             catch (Exception e)
             {
@@ -50,6 +58,8 @@ namespace clinet
             {
                 Socket client = (Socket)ar.AsyncState;
                 int bytesSent = client.EndSend(ar);
+                //Console.WriteLine("send:" + bytesSent);
+
             }
             catch (Exception e)
             {
@@ -178,7 +188,7 @@ namespace clinet
         }
 
         /// 发送一个流数据
-        public void Send(Stream Astream)
+        public void Send(byte[] d)
         {
             try
             {
@@ -186,36 +196,9 @@ namespace clinet
                 {
                     throw (new Exception("没有连接服务器不可以发送信息!"));
                 }
-                Astream.Position = 0;
-                byte[] byteData = new byte[bufferSize];
-                int bi1 = (int)((Astream.Length + 8) / bufferSize);
-                int bi2 = (int)Astream.Length;
-                if (((Astream.Length + 8) % bufferSize) > 0)
-                {
-                    bi1 = bi1 + 1;
-                }
-                bi1 = bi1 * bufferSize;
 
-                byteData[0] = System.Convert.ToByte(bi1 >> 24);
-                byteData[1] = System.Convert.ToByte((bi1 & 0x00ff0000) >> 16);
-                byteData[2] = System.Convert.ToByte((bi1 & 0x0000ff00) >> 8);
-                byteData[3] = System.Convert.ToByte((bi1 & 0x000000ff));
+                ClientSocket.BeginSend(d, 0, d.Length, 0, new AsyncCallback(SendCallback), ClientSocket);
 
-                byteData[4] = System.Convert.ToByte(bi2 >> 24);
-                byteData[5] = System.Convert.ToByte((bi2 & 0x00ff0000) >> 16);
-                byteData[6] = System.Convert.ToByte((bi2 & 0x0000ff00) >> 8);
-                byteData[7] = System.Convert.ToByte((bi2 & 0x000000ff));
-
-                int n = Astream.Read(byteData, 8, byteData.Length - 8);
-
-                while (n > 0)
-                {
-                    ClientSocket.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), ClientSocket);
-                    //Console.WriteLine("发送字节长度【{0}】", byteData.Length);
-                    sendDone.WaitOne();
-                    byteData = new byte[bufferSize];
-                    n = Astream.Read(byteData, 0, byteData.Length);
-                }
             }
             catch (Exception e)
             {

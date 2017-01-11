@@ -15,24 +15,19 @@ public class Index : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        //Debug.Log("begin connect");
         client = new MyTcpIpClient();
         client.Connect();
-        //Debug.Log("end connect");
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        //Debug.Log("begin receive data");
         client.ReceiveData();
-        //Debug.Log("end receive data");
 	}
 
     static public void SetData(byte[]a)
     {
         isReady = false;
         data = System.Text.Encoding.Default.GetString(a);
-        //Debug.Log("---------");
         Debug.Log(data[0]+" "+data[data.Length-1]);
         isReady = true;
     }

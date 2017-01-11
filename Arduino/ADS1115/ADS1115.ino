@@ -26,10 +26,46 @@ void loop(void)
 
   JY901.GetAcc();
   Serial.print("Acc:");
-  Serial.print((float)JY901.stcAcc.a[0]/32768*16);
-  Serial.print(" ");
-  Serial.print((float)JY901.stcAcc.a[1]/32768*16);
-  Serial.print(" ");Serial.println((float)JY901.stcAcc.a[2]/32768*16);
+
+   Serial.print((JY901.stcAcc.a[0] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAcc.a[0]) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAcc.a[1] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAcc.a[1]) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAcc.a[2] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.println((JY901.stcAcc.a[2]) & 0xFF);// /32768*180
+
+   JY901.GetGyro();  
+   Serial.print("Gyro ");
+   Serial.print((JY901.stcGyro.w[0] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcGyro.w[0]) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcGyro.w[1] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcGyro.w[1]) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcGyro.w[2] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.println((JY901.stcGyro.w[2]) & 0xFF);// /32768*180
+   
+   JY901.GetAngle();
+   Serial.print("Angle: ");
+   Serial.print((JY901.stcAngle.Angle[0] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAngle.Angle[0]) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAngle.Angle[1] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAngle.Angle[1]) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.print((JY901.stcAngle.Angle[2] >> 8) & 0xFF);// /32768*180
+   Serial.print(" ");
+   Serial.println((JY901.stcAngle.Angle[2]) & 0xFF);// /32768*180
   
   Serial.print(dz0);
   Serial.print(" ");

@@ -10,7 +10,7 @@ public class Hand : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+	    
 	}
 	
 	// Update is called once per frame
@@ -19,8 +19,10 @@ public class Hand : MonoBehaviour {
 	}
 
     //use the gyro to show the rotation of xyz axis
-    void ShowXYZRotation(int x, int y, int z)
+    void SetXYZRotation(int x, int y, int z)
     {
+        if(Index.IsReady())
+            hand.transform.rotation = Quaternion.Slerp(hand.transform.)
 
     }
 

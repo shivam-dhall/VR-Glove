@@ -34,13 +34,7 @@ namespace clinet
                 Socket client = (Socket)ar.AsyncState;
                 client.EndConnect(ar);
                 //////
-                connectDone.WaitOne();
-                byte[] a = new byte[2];
-                a[0] = (byte)'2';
-                a[1] = (byte)'\0';
-                Send(a);
-                ///////
-                isConnect = true;
+
 
             }
             catch (Exception e)
@@ -84,7 +78,7 @@ namespace clinet
                     handler = state.workSocket;
                     int bytesRead = handler.EndReceive(ar);
                     int readCnt = 0;//the length of data which has been read in this callback func
-
+                    Index.print("receive:" + bytesRead);
                     if (bytesRead > 0)
                     {
                         if (state.cnt + bytesRead < 5)
@@ -111,6 +105,7 @@ namespace clinet
                                 state.dataType = (int)state.lt_record[4];
                                 readCnt += (5 - state.cnt);
                                 //data = new byte[state.packSize];
+                                Index.print("packsize:"+state.packSize);
                             }
 
                         }
@@ -161,6 +156,13 @@ namespace clinet
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, tcpIpServerPort);
                 connectDone.Reset();
                 ClientSocket.BeginConnect(remoteEP, new AsyncCallback(ConnectCallback), ClientSocket);
+                connectDone.WaitOne();
+                byte[] a = new byte[2];
+                a[0] = (byte)'2';
+                a[1] = (byte)'\0';
+                Send(a);
+                ///////
+                isConnect = true;
             }
             catch (Exception e)
             {
@@ -227,7 +229,7 @@ namespace clinet
                 if (this.isOnceFinished)
                 {
                     this.isOnceFinished = false;
-                    ClientSocket.BeginReceive(Cstate.buffer, 0, bufferSize, 0,
+                    ClientSocket.BeginReceive(Cstate.buffer, 0, 93, 0,
                     new AsyncCallback(ReceiveCallback), Cstate);
                 }
             }

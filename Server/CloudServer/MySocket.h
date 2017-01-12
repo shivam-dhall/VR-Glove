@@ -33,6 +33,12 @@ public:
 		bufferSize1 = BUFFER_SIZE;
 		server_sockfd = -1;
 		connUnity = -1;
+		cnt = 0;
+		// char i1 = -1;
+		// char i2 = -1;
+		// short s = (short)((i1<<8)|(i2&0x00FF));
+		// int d = s;
+		// cout<<s<<" "<<d<<" "<<hex<<s<<" "<<d<<endl;
 
 	}
 
@@ -58,7 +64,9 @@ public:
 	}
 
 	void BeginWork(){
-		cout << "-----------" << endl;
+		cout << "-----------" <<(++cnt)<< endl;
+		if(connArduino==-1)
+			return;
 		///int len = _ReceiveData(connArduino);
 		memset(receiveData,0,sizeof(receiveData));
 		int len = recv(connArduino, receiveData, bufferSize1,0);
@@ -72,11 +80,21 @@ public:
 					receiveData[i] -= receiveData[i+2];
 				if(receiveData[i+1] == receiveData[i+2])
 					receiveData[i+1] -= receiveData[i+2];
-				//cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
-				short dd = (short)((receiveData[i]<<8)|(receiveData[i+1]));
-				int d = dd;
+				cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
+
+				//short dd = (short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
+				int d;
+
+				if(i/3>=3&&i/3<=12){
+					unsigned short dd = (unsigned short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
+					d = dd;
+				}
+				else{
+					short dd = (short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
+					d = dd;
+				}
 				
-				cout<<d<<",";
+				
 				if((i/3>=0&&i/3<=2)||(i/3>=13&&i/3<=15))
 					data[i/3] = ((float)d)*16/32768;
 				else if(i/3>=16&&i/3<=18)
@@ -87,10 +105,16 @@ public:
 					;
 				else if(i/3>=9&&i/3<=12)
 					;
+
+				cout<<d<<",";
 			}
 		}
 		cout<<endl;
 		Print();
+		int temp[22];
+		for(int i=0;i<22;++i)
+			temp[i] = (int)data[i];
+		_SendData(connUnity,temp,22,1);
 	}
 
 
@@ -199,12 +223,52 @@ private:
 
 	}
 
+	void _SendData(int conn,int *arr,int size,int type){
+		if(conn == -1){
+			cout<<"not connect"<<endl;
+			return;
+		}
+		memset(buffer,0,sizeof(buffer));
+
+		size *= 4;
+
+		buffer[0] = (char)((size >> 24) & 0xFF);
+		buffer[1] = (char)((size >> 16) & 0xFF);
+		buffer[2] = (char)((size >> 8) & 0xFF);
+		buffer[3] = (char)(size & 0xFF);
+		buffer[4] = (char)(type & 0xFF);
+		for(int i=0;i<size/4;++i)
+			cout<<arr[i]<<"--";
+		cout<<endl;
+
+		for(int i=0;i<size/4;++i){
+			buffer[i*4+5] = (char)((arr[i] >> 24) & 0xFF);
+			buffer[i*4+6] = (char)((arr[i] >> 16) & 0xFF);
+			buffer[i*4+7] = (char)((arr[i] >> 8) & 0xFF);
+			buffer[i*4+8] = (char)((arr[i]) & 0xFF);
+		}
+
+		char *index = buffer;		
+		int ret = size + 5;
+		cout<<"send "<<ret<<"data:";
+		for(int i=0;i<ret;++i)
+			cout<<(int)buffer[i]<<",";
+		cout<<endl;
+		while(ret>0){
+			int sendSize = (ret<bufferSize?ret:bufferSize);
+			send(conn, index, sendSize,0);
+			ret -= sendSize;
+			index += sendSize;
+		}
+	}
+
 
 	void _SendData(int conn,char* data,int size, int type){
 		if(conn == -1){
 			cout<<"not connect"<<endl;
 			return;
 		}
+		memset(buffer,0,sizeof(buffer));
 
 		char* head = buffer;
 
@@ -261,6 +325,8 @@ private:
 	int bufferSize1;
 	int connArduino;
 	float data[22];
+
+	int cnt;
 };
 
 MySocket* MySocket::mySocket = NULL;

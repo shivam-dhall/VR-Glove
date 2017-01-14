@@ -53,6 +53,9 @@ void *threadFunc1(void *arg){
 
 int main()
 {
+
+
+
 	sock = MySocket::getInstance();
 	sock->OpenPort();
 	sock->WaitClient();
@@ -66,8 +69,9 @@ int main()
 		printf("pthread_create error:%s\n", strerror(err));
 		exit(-1);
 	}
+
 	while (1){
-		cout << "***********" << endl;
+		cout << "*********** " << endl;
 		usleep(1000000);
 	}
 	//char a[23456];

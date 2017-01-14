@@ -9,6 +9,8 @@
 #include <fcntl.h>
 #include <sys/shm.h>
 #include <iostream>
+#include <sys/time.h>  
+#include <time.h>  
 
 using namespace std;
 
@@ -39,6 +41,9 @@ public:
 		// short s = (short)((i1<<8)|(i2&0x00FF));
 		// int d = s;
 		// cout<<s<<" "<<d<<" "<<hex<<s<<" "<<d<<endl;
+		lasttime = 0;
+
+
 
 	}
 
@@ -94,7 +99,6 @@ public:
 					d = dd;
 				}
 				
-				
 				if((i/3>=0&&i/3<=2)||(i/3>=13&&i/3<=15))
 					data[i/3] = ((float)d)*16/32768;
 				else if(i/3>=16&&i/3<=18)
@@ -111,10 +115,35 @@ public:
 		}
 		cout<<endl;
 		Print();
-		int temp[22];
-		for(int i=0;i<22;++i)
-			temp[i] = (int)data[i];
-		_SendData(connUnity,temp,22,1);
+		gettimeofday(&tv,0);  
+		unsigned long timenow = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+		if(lasttime == 0){
+			lasttime = timenow;
+			lastZAngle = data[21];
+		}
+		else{
+			int interval = timenow - lasttime;
+			lasttime = timenow;
+
+			for(int i=16;i<19;++i)
+				data[i] *= interval;
+
+
+			cout<<"nowangle:"<<data[21]<<" lastZAngle:"<<lastZAngle<<" minus:";
+			int temp_angle = data[21];
+			data[21]-=lastZAngle;
+			lastZAngle = temp_angle;
+			cout<<data[21]<<endl;
+
+			if(data[21]<1&&data[21]>-1)
+				data[21] = -361;
+
+			int temp[22];
+			for(int i=0;i<22;++i)
+				temp[i] = (int)data[i];
+			_SendData(connUnity,temp,22,1);
+		}
+		
 	}
 
 
@@ -327,6 +356,9 @@ private:
 	float data[22];
 
 	int cnt;
+	struct timeval tv;
+	unsigned long lasttime;
+	int lastZAngle;
 };
 
 MySocket* MySocket::mySocket = NULL;

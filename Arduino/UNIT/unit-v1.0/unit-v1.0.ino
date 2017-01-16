@@ -9,9 +9,9 @@ char head[15] = "AT+CIPSEND=186";
 char data[186];
 
 bool isInit = false;
-char data1[60];
-char data2[60];
-char data3[66];
+//char data1[60];
+//char data2[60];
+//char data3[66];
 
 void setup() 
 {
@@ -20,17 +20,17 @@ void setup()
    ads.begin();
    for(int i=0;i<186;++i)
       data[i]='b';
-   for(int i=0;i<60;++i){
-      data1[i] = 's';
-      data2[i] =  't';
-   }
+//   for(int i=0;i<60;++i){
+//      data1[i] = 's';
+//      data2[i] =  't';
+//   }
+//
+//    for(int i=0;i<66;++i){
+//      data3[i] = 'r';
+//   }
 
-    for(int i=0;i<66;++i){
-      data3[i] = 'r';
-   }
-
-//   delay(2000);
-//   sendRST();
+   delay(2000);
+   sendRST();
 } 
 
 void loop() 
@@ -67,7 +67,7 @@ void loop()
    writeTime(start,59);
    jy901();
    int2char(start,60);
-   Serial.print(data);
+   Serial.write(data,186);
    Serial.println();
 //   Serial.print("cost");
 //   Serial.println(millis()-start);

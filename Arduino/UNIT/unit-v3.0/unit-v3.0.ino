@@ -4,11 +4,8 @@
 
 Adafruit_ADS1115 ads(0x48);
 
-char head[15] = "AT+CIPSEND=183";
-//char data[1];
-char data1[63];
-char data2[60];
-char data3[60];
+char head[14];// = "AT+CIPSEND=153";
+char data[153];
 bool isInit = false;
 
 void setup() 
@@ -16,13 +13,23 @@ void setup()
    Serial.begin(115200);
    JY901.StartIIC();
    ads.begin();
-   for(int i=0;i<60;++i){
-      data3[i] = 'c';
-      data2[i] = 'b';
-   }
-    for(int i=0;i<63;++i){
-      data1[i] = 'a';
-   }
+   head[0]='A';
+   head[1]='T';
+   head[2]='+';
+   head[3]='C';
+   head[4]='I';
+   head[5]='P';
+   head[6]='S';
+   head[7]='E';
+   head[8]='N';
+   head[9]='D';
+   head[10]='=';
+   head[11]='1';
+   head[12]='5';
+   head[13]='3';
+
+   for(int i=0;i<153;++i)
+      data[i]='b';
 
    delay(2000);
    sendRST();
@@ -30,65 +37,48 @@ void setup()
 
 void loop() 
 {
-  
    unsigned long start = millis();
-   int2char(start,19,1);
-   jy901();//1
+   jy901(10);
    
    short adc0,adc1,adc2,adc3;  // we read from the ADC, we have a sixteen bit integer as a result
    adc0 = ads.readADC_SingleEnded(0);
    adc1 = ads.readADC_SingleEnded(1);
    
-   writeTime(start,0,2);
-   jy901();//2
+   writeTime(start,48);
+   jy901(19);
    
    adc2 = ads.readADC_SingleEnded(2);
    adc3 = ads.readADC_SingleEnded(3);
    
-   writeTime(start,0,3);
-   jy901();//3
-   
+
    short value0 = analogRead( A0 );
    short value1 = analogRead( A1 );
    short value2 = analogRead( A2 );
    short value3 = analogRead( A3 );
    short value6 = analogRead( A6 );
    short value7 = analogRead( A7 );
-   
-   Serial.print(head);
+   writeTime(start,49);
+   jy901(28);
+   Serial.write(head,14);
    Serial.println();
+   int2char(start,46);
+   writeTime(start,50);
+   jy901(37);  
 
-   Serial.write(data1,63);
-   writeTime(start,10,2);
-   jy901();//4
-
-   Serial.write(data2,60);
-   
-   writeTime(start,10,3);
-   jy901();//5
-
-   Serial.write(data3,60);
+   Serial.write(data,153);
    Serial.println();
 //   Serial.print("cost");
 //   Serial.println(millis()-start);
     
 }
 
-void writeTime(unsigned long start,int curr,int type){
+void writeTime(unsigned long start,int curr){
    int t = (millis()-start);
-   short2char(t,curr,type);
+   short2char(t,curr);
 }
 
 
-void dealShortData(int curr,int type){
-    char* data;
-    if(type==1)
-      data = data1;
-    else if(type==2)
-      data = data2;
-    else if(type==3)
-      data = data3;
-  
+void dealShortData(int curr){
     int i = curr*3;
     if(data[i]==0&&data[i+1]==0){
       data[i]= (char)1;
@@ -125,39 +115,6 @@ void dealShortData(int curr,int type){
     }
 }
 
-void short2char(short d,int curr,int type){//curr 第几个short
-  char* data;
-  if(type==1)
-    data = data1;
-  else if(type==2)
-    data = data2;
-  else if(type==3)
-    data = data3;
-  
-  int p = curr*3;
-  data[p] = (char)((d >> 8) & 0xFF);
-  data[p+1] = (char)(d & 0xFF);
-  dealShortData(curr,type);
-}
-
-void int2char(unsigned long t,int curr,int type){
-  char* data;
-  if(type==1)
-    data = data1;
-  else if(type==2)
-    data = data2;
-  else if(type==3)
-    data = data3;
-  
-  unsigned long d = millis();
-  int p = curr*3;
-  data[p] = (char)((d >> 24) & 0xFF);
-  data[p+1] = (char)((d >> 16) & 0xFF);
-  dealShortData(curr,type);
-  data[p+3] = (char)((d >> 8) & 0xFF);
-  data[p+4] = (char)(d & 0xFF);
-  dealShortData(curr+1,type);
-}
 
 void sendRST(){
     char a0[3] = "AT";
@@ -188,7 +145,7 @@ void sendRST(){
     
 }
 
-void jy901(){
+void jy901(int curr){
     JY901.GetAcc();
     for(int j = 0;j<3;++j){
       int i1 = JY901.stcAcc.a[j];
@@ -204,6 +161,24 @@ void jy901(){
     for(int j = 0;j<3;++j){
       int i1 = JY901.stcAngle.Angle[j];
     }
+}
+
+void short2char(short d,int curr){//curr 第几个short
+  int p = curr*3;
+  data[p] = (char)((d >> 8) & 0xFF);
+  data[p+1] = (char)(d & 0xFF);
+  dealShortData(curr);
+}
+
+void int2char(unsigned long t,int curr){
+  unsigned long d = millis();
+  int p = curr*3;
+  data[p] = (char)((d >> 24) & 0xFF);
+  data[p+1] = (char)((d >> 16) & 0xFF);
+  dealShortData(curr);
+  data[p+3] = (char)((d >> 8) & 0xFF);
+  data[p+4] = (char)(d & 0xFF);
+  dealShortData(curr+1);
 }
 
 

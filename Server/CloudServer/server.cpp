@@ -46,7 +46,7 @@ MySocket *sock;
 
 void *threadFunc1(void *arg){
 	while (1){		
-		sock->BeginWork();
+		sock->BeginWork1();
 		usleep(10000);
 	}
 }
@@ -59,7 +59,7 @@ int main()
 	sock = MySocket::getInstance();
 	sock->OpenPort();
 	sock->WaitClient();
-	sock->WaitClient();
+	//sock->WaitClient();
 		
 	pthread_t tid1;
 	int err;

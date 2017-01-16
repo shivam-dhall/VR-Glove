@@ -68,6 +68,54 @@ public:
 		cout<<endl;
 	}
 
+
+	void BeginWork1(){
+		cout << "-----------" <<(++cnt)<< endl;
+		if(connArduino==-1)
+			return;
+		///int len = _ReceiveData(connArduino);
+		memset(receiveData,0,sizeof(receiveData));
+		int len = recv(connArduino, receiveData, bufferSize1,0);
+		cout<<"receive:"<<len<<"data from arduino,"<<endl;
+		for(int i=138;i<153;++i)
+			cout<<i<<":"<<(int)receiveData[i]<<" ";
+		cout<<endl;
+		if(len == 153){
+			int temp[4];
+			for(int i=138; i<153; i = i+3){
+				if(receiveData[i] == receiveData[i+2])
+					receiveData[i] -= receiveData[i+2];
+				if(receiveData[i+1] == receiveData[i+2])
+					receiveData[i+1] -= receiveData[i+2];
+				if(i/3>=46)
+				cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
+
+				int d;
+
+				if(i/3>=48&&i/3<=50){
+					unsigned short dd = (unsigned short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
+					temp[i/3-47] = dd;
+				}
+				else if(i/3==46){
+					unsigned int dd = (unsigned int)(((receiveData[i]&0xFF)<<24)|
+								 ((receiveData[i+1]&0xFF)<<16)|
+								 ((receiveData[i+3]&0xFF)<<8)|
+								  (receiveData[i+4]&0xFF));
+					temp[0] = dd; 
+				}
+
+			}
+			gettimeofday(&tv,0);  
+			unsigned long timenow = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+			cout<<endl<<"timenow:-----------------"<<timenow<<endl;
+			for(int i=0;i<4;++i)
+				cout<<temp[i]<<endl;
+		}
+		//cout<<endl;
+
+		
+	}
+
 	void BeginWork(){
 		cout << "-----------" <<(++cnt)<< endl;
 		if(connArduino==-1)
@@ -221,6 +269,8 @@ public:
 
 		if(buffer!=NULL)
 			delete []buffer;
+		if(receiveData!=NULL)
+			delete []receiveData;
 
 	}
 

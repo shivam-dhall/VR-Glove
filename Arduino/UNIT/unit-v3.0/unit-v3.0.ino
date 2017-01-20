@@ -38,19 +38,22 @@ void setup()
 void loop() 
 {
    unsigned long start = millis();
-   jy901(10);
+   jy901(0);
    
    short adc0,adc1,adc2,adc3;  // we read from the ADC, we have a sixteen bit integer as a result
    adc0 = ads.readADC_SingleEnded(0);
+   short2char(adc0,0);
    adc1 = ads.readADC_SingleEnded(1);
+   short2char(adc1,1);
    
    writeTime(start,48);
-   jy901(19);
+   jy901(1);
    
    adc2 = ads.readADC_SingleEnded(2);
    adc3 = ads.readADC_SingleEnded(3);
+   short2char(adc2,2);
+   short2char(adc3,3);
    
-
    short value0 = analogRead( A0 );
    short value1 = analogRead( A1 );
    short value2 = analogRead( A2 );
@@ -58,12 +61,18 @@ void loop()
    short value6 = analogRead( A6 );
    short value7 = analogRead( A7 );
    writeTime(start,49);
-   jy901(28);
+   jy901(2);
    Serial.write(head,14);
    Serial.println();
    int2char(start,46);
    writeTime(start,50);
-   jy901(37);  
+   short2char(value0,4);
+   short2char(value1,5);
+   short2char(value2,6);
+   short2char(value3,7);
+   short2char(value6,8);
+   short2char(value7,9);
+   jy901(3);  
 
    Serial.write(data,153);
    Serial.println();
@@ -145,21 +154,28 @@ void sendRST(){
     
 }
 
-void jy901(int curr){
+void jy901(int t){
+    short temp[9];
+    
     JY901.GetAcc();
     for(int j = 0;j<3;++j){
-      int i1 = JY901.stcAcc.a[j];
+      temp[j] = JY901.stcAcc.a[j];
     }
    
     JY901.GetGyro();  
-
-    for(int j = 0;j<3;++j){
-      int i1 = JY901.stcGyro.w[j];
+    for(int j = 3;j<6;++j){
+      temp[j] = JY901.stcGyro.w[j];
     }
 
     JY901.GetAngle();
-    for(int j = 0;j<3;++j){
-      int i1 = JY901.stcAngle.Angle[j];
+    for(int j = 6;j<9;++j){
+      temp[j] = JY901.stcAngle.Angle[j];
+    }
+
+    int first = 10+t*9;
+
+    for(int i=0;i<9;++i){
+      short2char(temp[i],first+i);
     }
 }
 

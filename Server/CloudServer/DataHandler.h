@@ -1,6 +1,7 @@
 #include <iostream>
 #include <time.h>
 #include <sys/time.h>
+#include "DataUnit.h"
 using namespace std;
 
 class DataHandler{
@@ -39,10 +40,18 @@ public:
 
 		cout<<endl;
 
+		for(int i=0;i<4;++i){
+			cout<<"construct dataunit-"<<i<<":"<<endl;
+			//cout<<(*())
+			DataUnit d = DataUnit(recvData+(i*9+10));
+		}
+
 		// data[i/3] = ((float)d)*16/32768;
 		// data[i/3] = (float)d*2000/32768;
 		// data[i/3] = (float)d*180/32768;
 	}
+
+
 
 	~DataHandler(){
 

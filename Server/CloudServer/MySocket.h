@@ -10,7 +10,8 @@
 #include <sys/shm.h>
 #include <iostream>
 #include <sys/time.h>  
-#include <time.h>  
+  
+#include "DataHandler.h"
 
 using namespace std;
 
@@ -41,7 +42,8 @@ public:
 		// short s = (short)((i1<<8)|(i2&0x00FF));
 		// int d = s;
 		// cout<<s<<" "<<d<<" "<<hex<<s<<" "<<d<<endl;
-		lasttime = 0;
+		//lasttime = 0;
+		dataHandler = DataHandler();
 
 
 
@@ -69,53 +71,6 @@ public:
 	}
 
 
-	void BeginWork1(){
-		cout << "-----------" <<(++cnt)<< endl;
-		if(connArduino==-1)
-			return;
-		///int len = _ReceiveData(connArduino);
-		memset(receiveData,0,sizeof(receiveData));
-		int len = recv(connArduino, receiveData, bufferSize1,0);
-		cout<<"receive:"<<len<<"data from arduino,"<<endl;
-		for(int i=138;i<153;++i)
-			cout<<i<<":"<<(int)receiveData[i]<<" ";
-		cout<<endl;
-		if(len == 153){
-			int temp[4];
-			for(int i=138; i<153; i = i+3){
-				if(receiveData[i] == receiveData[i+2])
-					receiveData[i] -= receiveData[i+2];
-				if(receiveData[i+1] == receiveData[i+2])
-					receiveData[i+1] -= receiveData[i+2];
-				if(i/3>=46)
-				cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
-
-				int d;
-
-				if(i/3>=48&&i/3<=50){
-					unsigned short dd = (unsigned short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
-					temp[i/3-47] = dd;
-				}
-				else if(i/3==46){
-					unsigned int dd = (unsigned int)(((receiveData[i]&0xFF)<<24)|
-								 ((receiveData[i+1]&0xFF)<<16)|
-								 ((receiveData[i+3]&0xFF)<<8)|
-								  (receiveData[i+4]&0xFF));
-					temp[0] = dd; 
-				}
-
-			}
-			gettimeofday(&tv,0);  
-			unsigned long timenow = tv.tv_sec * 1000 + tv.tv_usec / 1000;
-			cout<<endl<<"timenow:-----------------"<<timenow<<endl;
-			for(int i=0;i<4;++i)
-				cout<<temp[i]<<endl;
-		}
-		//cout<<endl;
-
-		
-	}
-
 	void BeginWork(){
 		cout << "-----------" <<(++cnt)<< endl;
 		if(connArduino==-1)
@@ -123,78 +78,83 @@ public:
 		///int len = _ReceiveData(connArduino);
 		memset(receiveData,0,sizeof(receiveData));
 		int len = recv(connArduino, receiveData, bufferSize1,0);
-		cout<<"receive:"<<len<<"data from arduino,"<<endl;
-		// for(int i=0;i<66;++i)
-		// 	cout<<(int)receiveData[i]<<" ";
-		cout<<endl;
-		if(len == 66){
-			for(int i=0; i<66; i = i+3){
+		//cout<<"receive:"<<len<<"data from arduino,"<<endl;
+		//for(int i=0;i<153;++i)
+			//cout<<i<<":"<<(int)receiveData[i]<<" ";
+		//cout<<endl;
+		if(len == 153){
+			//int temp[50];
+			for(int i=0; i<153; i = i+3){
 				if(receiveData[i] == receiveData[i+2])
 					receiveData[i] -= receiveData[i+2];
 				if(receiveData[i+1] == receiveData[i+2])
 					receiveData[i+1] -= receiveData[i+2];
-				cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
+				//cout<<i<<":"<<(int)receiveData[i]<<" "<<(int)receiveData[i+1]<<"#";
 
-				//short dd = (short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
 				int d;
-
-				if(i/3>=3&&i/3<=12){
+				if(i/3<=9){
 					unsigned short dd = (unsigned short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
-					d = dd;
+					dataHandler.setRecvData(dd,i/3);
+					//temp[i/3] = dd;
 				}
-				else{
+				else if(i/3>=10&&i/3<=45){
 					short dd = (short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
-					d = dd;
+					dataHandler.setRecvData(dd,i/3);
+					//temp[i/3] = dd;
 				}
-				
-				if((i/3>=0&&i/3<=2)||(i/3>=13&&i/3<=15))
-					data[i/3] = ((float)d)*16/32768;
-				else if(i/3>=16&&i/3<=18)
-					data[i/3] = (float)d*2000/32768;
-				else if(i/3>=19&&i/3<=21)
-					data[i/3] = (float)d*180/32768;
-				else if(i/3>=3&&i/3<=8)
-					;
-				else if(i/3>=9&&i/3<=12)
-					;
+				else if(i/3==46){
+					unsigned int dd = (unsigned int)(((receiveData[i]&0xFF)<<24)|
+								 ((receiveData[i+1]&0xFF)<<16)|
+								 ((receiveData[i+3]&0xFF)<<8)|
+								  (receiveData[i+4]&0xFF));
+					dataHandler.setRecvData(dd,i/3);
+					//temp[46] = dd;
+				}
+				else if(i/3>=48&&i/3<=50){
+					unsigned short dd = (unsigned short)((receiveData[i]<<8)|(receiveData[i+1]&0x00FF));
+					dataHandler.setRecvData(dd,i/3-1);
+					//temp[i/3-1] = dd;
+				}
 
-				cout<<d<<",";
 			}
+
+			dataHandler.printRecvData();
+
+			// Print();
+			// gettimeofday(&tv,0);  
+			// unsigned long timenow = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+			// if(lasttime == 0){
+			// 	lasttime = timenow;
+			// 	lastZAngle = data[21];
+			// }
+			// else{
+			// 	int interval = timenow - lasttime;
+			// 	lasttime = timenow;
+
+			// 	for(int i=16;i<19;++i)
+			// 		data[i] *= interval;
+
+
+			// 	cout<<"nowangle:"<<data[21]<<" lastZAngle:"<<lastZAngle<<" minus:";
+			// 	int temp_angle = data[21];
+			// 	data[21]-=lastZAngle;
+			// 	lastZAngle = temp_angle;
+			// 	cout<<data[21]<<endl;
+
+			// 	if(data[21]<1&&data[21]>-1)
+			// 		data[21] = -361;
+
+			// 	int temp[22];
+			// 	for(int i=0;i<22;++i)
+			// 		temp[i] = (int)data[i];
+			// 	_SendData(connUnity,temp,22,1);
+			// }
+			
 		}
-		cout<<endl;
-		Print();
-		gettimeofday(&tv,0);  
-		unsigned long timenow = tv.tv_sec * 1000 + tv.tv_usec / 1000;
-		if(lasttime == 0){
-			lasttime = timenow;
-			lastZAngle = data[21];
-		}
-		else{
-			int interval = timenow - lasttime;
-			lasttime = timenow;
+		//cout<<endl;
 
-			for(int i=16;i<19;++i)
-				data[i] *= interval;
-
-
-			cout<<"nowangle:"<<data[21]<<" lastZAngle:"<<lastZAngle<<" minus:";
-			int temp_angle = data[21];
-			data[21]-=lastZAngle;
-			lastZAngle = temp_angle;
-			cout<<data[21]<<endl;
-
-			if(data[21]<1&&data[21]>-1)
-				data[21] = -361;
-
-			int temp[22];
-			for(int i=0;i<22;++i)
-				temp[i] = (int)data[i];
-			_SendData(connUnity,temp,22,1);
-		}
 		
 	}
-
-
 
 	void OpenPort(int port = PORT){
 		buffer = new char[bufferSize];
@@ -406,9 +366,11 @@ private:
 	float data[22];
 
 	int cnt;
-	struct timeval tv;
-	unsigned long lasttime;
-	int lastZAngle;
+	// struct timeval tv;
+	// unsigned long lasttime;
+	// int lastZAngle;
+
+	DataHandler dataHandler;
 };
 
 MySocket* MySocket::mySocket = NULL;

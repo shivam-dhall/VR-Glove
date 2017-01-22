@@ -46,7 +46,7 @@ MySocket *sock;
 
 void *threadFunc1(void *arg){
 	while (1){		
-		sock->BeginWork1();
+		sock->BeginWork();
 		usleep(10000);
 	}
 }

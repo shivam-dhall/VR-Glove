@@ -3,14 +3,20 @@
 using namespace std;
 #define PI 3.141592653
 
+//normalise acc, multiply g(9.8m/s2) to get the real value
 class Acceleration{
 public:
 	Acceleration(){}
 
 	Acceleration(int _x,int _y,int _z){
+
 		x = (float)_x/32768*16;
 		y = (float)_y/32768*16;
 		z = (float)_z/32768*16;
+		float norm = sqrt(x*x+y*y+z*z);
+		x /= norm;
+		y /= norm;
+		z /= norm;
 	}
 
 //private:
@@ -53,8 +59,6 @@ public:
 		q[3] = cos(rad_x/2)*cos(rad_y/2)*sin(rad_z/2) - sin(rad_x/2)*sin(rad_y/2)*cos(rad_z/2);
 		
 	}
-
-
 
 //private:
 	float x;

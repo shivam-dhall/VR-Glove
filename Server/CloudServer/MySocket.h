@@ -44,9 +44,6 @@ public:
 		// cout<<s<<" "<<d<<" "<<hex<<s<<" "<<d<<endl;
 		//lasttime = 0;
 		dataHandler = DataHandler();
-
-
-
 	}
 
 	void setBufferSize(int size){

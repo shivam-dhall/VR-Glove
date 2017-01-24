@@ -62,4 +62,7 @@ private:
 	struct timeval tv;
 	unsigned long lasttime;
 	int lastZAngle;
+	static float v;
 };
+
+float DataHandler::v = 0.0f;

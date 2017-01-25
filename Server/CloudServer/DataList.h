@@ -22,14 +22,14 @@ public:
 		return list;
 	}
 
-	void addDataUnit(DataUnit& unit){
+	void addDataUnit(int* startPos,int t){
 		length++;
 		if(length > MAX_LENGTH){
 			cout<<"out of length"<<endl;
 			return;
 		}
-		dataList[index++] = unit;
-		cout<<"datalist time:"<<datalist[index-1].time<<endl;
+		dataList[index++] = DataUnit(startPos,t);
+		cout<<"datalist time:"<<dataList[index-1].getTime()<<endl;
 		if(index>=512)
 			index = 0;
 	}
@@ -46,7 +46,7 @@ public:
 			//index: i%512
 
 		}
-		return find_index;
+		return find_gesture;
 	}
 
 
@@ -59,6 +59,6 @@ private:
 	static DataList *list;
 };
 
-DataList DataList::list = NULL;
+DataList* DataList::list = NULL;
 
 #endif

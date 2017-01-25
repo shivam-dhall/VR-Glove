@@ -1,3 +1,6 @@
+#ifndef MY_SOCKET_H
+#define MY_SOCKET_H
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
@@ -371,3 +374,5 @@ private:
 };
 
 MySocket* MySocket::mySocket = NULL;
+
+#endif

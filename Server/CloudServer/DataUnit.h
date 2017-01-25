@@ -1,3 +1,6 @@
+#ifndef DATAUNIT_H
+#define DATAUNIT_H
+
 #include <iostream>
 #include <math.h>
 #include "DataType.h"
@@ -7,14 +10,20 @@ using namespace std;
 
 class DataUnit{
 public:
-	DataUnit(){}
+	DataUnit(){
+		acc = Acceleration();
+		angular = Angular();
+		angle = Angle();
+		time = 0;
+	}
 
 	//startPoint is the 9 int data's start position,
 	//we assume we use 9 data from the start position by default
-	DataUnit(int* startPos){
+	DataUnit(int* startPos,int t){
 		acc = Acceleration(startPos[0],startPos[1],startPos[2]);
 		angular = Angular(startPos[3],startPos[4],startPos[5]);
 		angle = Angle(startPos[6],startPos[7],startPos[8]);
+		time = t;
 		//g = 0;
 		_init();
 	}
@@ -22,6 +31,23 @@ public:
 	~DataUnit(){
 
 	}
+
+	int getTime(){
+		return time;
+	}
+
+	Acceleration& getAcc(){
+		return acc;
+	}
+
+	Angular& getAngular(){
+		return angular;
+	}
+
+	Angle& getAngle(){
+		return angle;
+	}
+
 private:
 	void _init(){
 			_eliminateAcc();
@@ -29,9 +55,9 @@ private:
 
 	void _eliminateAcc(){	
 		//cout<<"g:"<<g<<endl;
-		cout<<"x:"<<acc.x<<" y:"<<acc.y<<" z:"<<acc.z<<endl;
+		cout<<"x:"<<acc.getX()<<" y:"<<acc.getY()<<" z:"<<acc.getZ()<<endl;
 		float temp_g[3];
-		temp_g[0] = 2 * (angle.q[1] * angle.q[3] - angle.q[0] * angle.q[2]);
+		temp_g[0] = 2 * (angle.q[1] * angle.q[3] - angle.q[0] * angle.q[2]);///////////////////   /norm
 		temp_g[1] = 2 * (angle.q[0] * angle.q[1] + angle.q[2] * angle.q[3]);
 		temp_g[2] = angle.q[0] * angle.q[0] - angle.q[1] * angle.q[1] - angle.q[2] * angle.q[2] + angle.q[3] * angle.q[3];
 		cout<<"excellent solution:"<<temp_g[0]<<" "<<temp_g[1]<<" "<<temp_g[2]<<endl;
@@ -41,10 +67,13 @@ private:
 	Acceleration acc;
 	Angular angular;
 	Angle angle;
+	int time;
 	static float g;
 	static int cnt;
 };
 
 int DataUnit::cnt = 0;
 float DataUnit::g = 0;
+
+#endif
 

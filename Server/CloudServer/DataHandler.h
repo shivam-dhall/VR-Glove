@@ -1,13 +1,18 @@
+#ifndef DATAHANDLER_H
+#define DATAHANDLER_H
+
 #include <iostream>
 #include <time.h>
 #include <sys/time.h>
 #include "DataUnit.h"
+#include "DataList.h"
 using namespace std;
 
 class DataHandler{
 public:
 	DataHandler(){
-
+		lastDataUnit = DataUnit();
+		dataList = DataList::getInstance();
 	}
 
 	void setRecvData(int d, int i){
@@ -40,10 +45,13 @@ public:
 
 		cout<<endl;
 
+
 		for(int i=0;i<4;++i){
 			cout<<"construct dataunit-"<<i<<":"<<endl;
-			//cout<<(*())
-			DataUnit d = DataUnit(recvData+(i*9+10));
+			dataUnit[i] = DataUnit(recvData+(i*9+10));
+			cout<<"datahandler time:"<<dataUnit[i].time<<endl;
+			dataList->addDataUnit(dataUnit[i]);
+
 		}
 
 		// data[i/3] = ((float)d)*16/32768;
@@ -51,10 +59,9 @@ public:
 		// data[i/3] = (float)d*180/32768;
 	}
 
-
-
 	~DataHandler(){
-
+		if(dataList != NULL)
+			delete dataList;
 	}
 
 private:
@@ -63,6 +70,11 @@ private:
 	unsigned long lasttime;
 	int lastZAngle;
 	static float v;
+	DataList *dataList;
+	DataUnit lastDataUnit;
+	DataUnit dataUnit[4];
 };
 
 float DataHandler::v = 0.0f;
+
+#endif

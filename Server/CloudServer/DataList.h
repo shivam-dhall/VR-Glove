@@ -29,21 +29,21 @@ public:
 			return;
 		}
 		dataList[index++] = DataUnit(startPos,t);
-		cout<<"datalist time:"<<dataList[index-1].getTime()<<endl;
-		if(index>=512)
+		//cout<<"datalist time:"<<dataList[index-1].getTime()<<endl;
+		if(index>=MAX_LENGTH)
 			index = 0;
 	}
 
 	//delete [start,end)
 	void deleteDataUnit(int start,int end){
 		header = end;
-		int l = ((512+end-start)%512);
+		int l = ((MAX_LENGTH+end-start)%MAX_LENGTH);
 		length -= l;
 	}
 
 	int *findOneGesture(){
 		for(int i=header;i<header+length;++i){
-			//index: i%512
+			//index: i%MAX_LENGTH
 
 		}
 		return find_gesture;

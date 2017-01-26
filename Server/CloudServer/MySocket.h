@@ -119,6 +119,7 @@ public:
 			}
 
 			dataHandler.printRecvData();
+			dataHandler.handleRecvData();
 
 			// Print();
 			// gettimeofday(&tv,0);  

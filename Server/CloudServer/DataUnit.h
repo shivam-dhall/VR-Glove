@@ -64,6 +64,9 @@ private:
 		acc.setAcc(acc.x-temp_g[0],acc.y-temp_g[1],acc.z-temp_g[2]);
 	}
 
+
+	//
+
 	Acceleration acc;
 	Angular angular;
 	Angle angle;

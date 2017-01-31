@@ -34,7 +34,7 @@ public:
 			index = 0;
 	}
 
-	//
+	
 	//delete [start,end)
 	void deleteDataUnit(int start,int end){
 		header = end;

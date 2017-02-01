@@ -46,6 +46,8 @@ public:
 		for(int i=header;i<header+length;++i){
 			//index: i%MAX_LENGTH
 
+			//
+
 		}
 		return find_gesture;
 	}

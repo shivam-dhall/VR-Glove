@@ -47,10 +47,7 @@ public:
 			//index: i%MAX_LENGTH
 
 			
-			
-			
-			
-			
+
 
 		}
 		return find_gesture;

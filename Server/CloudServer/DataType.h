@@ -23,10 +23,20 @@ public:
 		// z /= norm;
 	}
 
+	void setAcceleration(Acceleration & a){
+		x = a.x;
+		y = a.y;
+		z = a.z;
+	}
+
 	void setAcc(float _x, float _y,float _z){
 		x = _x;
 		y = _y;
 		z = _z;
+	}
+
+	float getTotalAcc(){
+		return sqrt(x*x+y*y+z*z);
 	}
 
 	float getX(){
@@ -53,10 +63,17 @@ public:
 		x = y = z =0.0f;
 	}
 
+
 	Angular(int _x,int _y,int _z){
 		x = (float)_x*2000/32768;
 		y = (float)_y*2000/32768;
 		z = (float)_z*2000/32768;
+	}
+
+	void setAngular(Angular & a){
+		x = a.x;
+		y = a.y;
+		z = a.z;
 	}
 
 	float getX(){
@@ -97,6 +114,15 @@ public:
 		q[2] = cos(rad_x/2)*sin(rad_y/2)*cos(rad_z/2) + sin(rad_x/2)*cos(rad_y/2)*sin(rad_z/2);
 		q[3] = cos(rad_x/2)*cos(rad_y/2)*sin(rad_z/2) - sin(rad_x/2)*sin(rad_y/2)*cos(rad_z/2);
 		
+	}
+
+	void setAngle(Angle& a){
+		x = a.x;
+		y = a.y;
+		z = a.z;
+		rad_x = a.rad_x;
+		rad_y = a.rad_y;
+		rad_z = a.rad_z;
 	}
 
 

@@ -71,7 +71,7 @@ public:
 	}
 
 
-	void BeginWork(){
+	void BeginWork(ofstream& out){
 		cout << "-----------" <<(++cnt)<< endl;
 		if(connArduino==-1)
 			return;
@@ -120,6 +120,11 @@ public:
 
 			dataHandler.printRecvData();
 			dataHandler.handleRecvData();
+
+			if(cnt==100)
+				dataHandler.closeFile(out);
+			else if(cnt<100)
+				dataHandler.recordData(out);
 
 			// Print();
 			// gettimeofday(&tv,0);  

@@ -13,6 +13,7 @@ public:
 		length = 0;
 		header = 0;
 		index = 0;
+		staticCnt = 0;
 	}
 
 	static DataList *getInstance(){
@@ -22,16 +23,19 @@ public:
 		return list;
 	}
 
+
 	void addDataUnit(int* startPos,int t){
+		//dataList[index++] = DataUnit(startPos,t);
+		//cout<<"datalist time:"<<dataList[index-1].getTime()<<endl;
+		// if(index>=MAX_LENGTH)
+		// 	index = 0;
+
 		length++;
 		if(length > MAX_LENGTH){
 			cout<<"out of length"<<endl;
 			return;
 		}
-		dataList[index++] = DataUnit(startPos,t);
-		//cout<<"datalist time:"<<dataList[index-1].getTime()<<endl;
-		if(index>=MAX_LENGTH)
-			index = 0;
+
 	}
 
 	
@@ -40,6 +44,10 @@ public:
 		header = end;
 		int l = ((MAX_LENGTH+end-start)%MAX_LENGTH);
 		length -= l;
+	}
+
+	bool isStatic(){
+
 	}
 
 	int *findOneGesture(){
@@ -63,6 +71,7 @@ private:
 	int find_gesture[2];//start & length
 	DataUnit dataList[MAX_LENGTH];
 	static DataList *list;
+	int staticCnt;
 };
 
 DataList* DataList::list = NULL;

@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include "DataUnit.h"
 #include "DataList.h"
+#include <fstream>
 using namespace std;
 
 #define g 9.8
@@ -16,10 +17,25 @@ public:
 	DataHandler(){
 		lastDataUnit = DataUnit();
 		dataList = DataList::getInstance();
+		//ofstream out;
+		//out.open("hello.txt");
 	}
 
 	void setRecvData(int d, int i){
 		recvData[i] = d;
+	}
+
+	void recordData(ofstream &out){
+		if (out.is_open()){
+			for(int i=0;i<4;++i){
+				out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\n";
+			}
+		}
+	}
+
+	void closeFile(ofstream &out){
+		if (out.is_open())
+			out.close();
 	}
 
 	void handleRecvData(){
@@ -37,11 +53,12 @@ public:
 
 		float a = (lastDataUnit.getAcc().getX()+dataUnit[0].getAcc().getX())/2;
 		float t = dataUnit[0].getTime() - lastDataUnit.getTime();
+		cout<<"time0:"<<dataUnit[0].getTime()<<" lasttime:"<<lastDataUnit.getTime()<<endl;;
 		cout<<"cal_a0:"<<a<<endl;
 		if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
 			float ttt = a*g*t/1000;
-			v += (a*g*t/1000);
-			cout<<"plus:"<<ttt<<endl;
+			v += (a*g*100*t/1000);
+			cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
 		}
 
 		for(int i=1;i<4;++i){
@@ -49,12 +66,14 @@ public:
 			cout<<"cal_a"<<i<<":"<<a<<endl;
 			t = dataUnit[i].getTime() - dataUnit[i-1].getTime();
 			if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
-				v += (a*g*t/1000);
+				v += (a*g*100*t/1000);
 				float ttt = a*g*t/1000;
-				cout<<"plus:"<<ttt<<endl;
+				cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
 			}
 			
 		}
+
+		lastDataUnit.setDataUnit(dataUnit[3]);
 
 		cout<<"-----------------v:"<<v<<endl;
 
@@ -106,6 +125,7 @@ private:
 	DataList *dataList;
 	DataUnit lastDataUnit;
 	DataUnit dataUnit[4];
+	
 };
 
 float DataHandler::v = 0.0f;

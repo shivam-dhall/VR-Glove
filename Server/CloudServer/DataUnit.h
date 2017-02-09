@@ -28,8 +28,19 @@ public:
 		_init();
 	}
 
+	void setDataUnit(DataUnit & d){
+		acc.setAcceleration(d.getAcc());
+		angular.setAngular(d.getAngular());
+		angle.setAngle(d.getAngle());
+		time = d.getTime();
+	}
+
 	~DataUnit(){
 
+	}
+
+	float getTotalAcc(){
+		
 	}
 
 	int getTime(){

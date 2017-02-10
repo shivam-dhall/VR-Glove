@@ -12,7 +12,9 @@
 #include <pthread.h>
 //#include <syswait.h>
 #include "MySocket.h"
+#include <fstream>
 using namespace std;
+
 
 //#define MYPORT  8080
 //#define QUEUE   20
@@ -43,19 +45,19 @@ using namespace std;
 //	send(s, data, size, 0);
 //}
 MySocket *sock;
+ofstream out("hello.txt");
 
 void *threadFunc1(void *arg){
 	while (1){		
-		sock->BeginWork();
+		sock->BeginWork(out);
 		usleep(10000);
+		
 	}
 }
 
+
 int main()
 {
-
-
-
 	sock = MySocket::getInstance();
 	sock->OpenPort();
 	sock->WaitClient();
@@ -74,6 +76,7 @@ int main()
 		cout << "*********** " << endl;
 		usleep(1000000);
 	}
+
 	//char a[23456];
 	//cout << "***" << endl;
 	//a[0] = 'z';

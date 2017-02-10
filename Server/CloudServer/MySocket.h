@@ -119,12 +119,16 @@ public:
 			}
 
 			dataHandler.printRecvData();
-			dataHandler.handleRecvData();
 
-			if(cnt==100)
+			bool isrecord = false;
+			int flag = 180;
+
+			if(cnt==flag)
 				dataHandler.closeFile(out);
-			else if(cnt<100)
-				dataHandler.recordData(out);
+			else if(cnt<flag)
+				isrecord = true;
+
+			dataHandler.handleRecvData(out,isrecord);
 
 			// Print();
 			// gettimeofday(&tv,0);  

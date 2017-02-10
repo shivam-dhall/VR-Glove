@@ -15,7 +15,7 @@ using namespace std;
 class DataHandler{
 public:
 	DataHandler(){
-		lastDataUnit = DataUnit();
+		dataUnit[4] = DataUnit();
 		dataList = DataList::getInstance();
 		//ofstream out;
 		//out.open("hello.txt");
@@ -25,20 +25,12 @@ public:
 		recvData[i] = d;
 	}
 
-	void recordData(ofstream &out){
-		if (out.is_open()){
-			for(int i=0;i<4;++i){
-				out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\n";
-			}
-		}
-	}
-
 	void closeFile(ofstream &out){
 		if (out.is_open())
 			out.close();
 	}
 
-	void handleRecvData(){
+	void handleRecvData(ofstream &out,bool isrecord){
 		int time[4];
 		time[0] = recvData[46];
 		time[1] = recvData[46]+recvData[47];
@@ -51,31 +43,71 @@ public:
 			dataList->addDataUnit(recvData+(i*9+10),time[i]);
 		}
 
-		float a = (lastDataUnit.getAcc().getX()+dataUnit[0].getAcc().getX())/2;
-		float t = dataUnit[0].getTime() - lastDataUnit.getTime();
-		cout<<"time0:"<<dataUnit[0].getTime()<<" lasttime:"<<lastDataUnit.getTime()<<endl;;
-		cout<<"cal_a0:"<<a<<endl;
-		if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
-			float ttt = a*g*t/1000;
-			v += (a*g*100*t/1000);
-			cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
-		}
+		float a;
+		float t;
 
-		for(int i=1;i<4;++i){
-			a = (dataUnit[i-1].getAcc().getX()+dataUnit[i].getAcc().getX())/2;
+		for(int i=0;i<4;++i){
+			///////ax
+			a = (dataUnit[(i-1+5)%5].getAcc().getX()+dataUnit[i].getAcc().getX())/2;
 			cout<<"cal_a"<<i<<":"<<a<<endl;
-			t = dataUnit[i].getTime() - dataUnit[i-1].getTime();
+			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
 			if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
-				v += (a*g*100*t/1000);
+				velocity[0] += (a*g*100*t/1000);
 				float ttt = a*g*t/1000;
 				cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
 			}
-			
+			if(isrecord&&out.is_open())
+				out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\t"<<velocity[0]<<"\t";
+
+			///////ay
+
+			///////az
+
+			///////total acc
+			if(isrecord&&out.is_open())
+				out<<dataUnit[i].getAcc().getTotalAcc()<<"\r\n";
+
+
+			//////isStatic,vx = vy = vz = 0;
+
 		}
 
-		lastDataUnit.setDataUnit(dataUnit[3]);
+		dataUnit[4].setDataUnit(dataUnit[3]);
 
-		cout<<"-----------------v:"<<v<<endl;
+		cout<<"-----------------v0:"<<velocity[0]<<endl;
+
+
+
+
+		
+
+		// float a = (lastDataUnit.getAcc().getX()+dataUnit[0].getAcc().getX())/2;
+		// float t = dataUnit[0].getTime() - lastDataUnit.getTime();
+		// cout<<"time0:"<<dataUnit[0].getTime()<<" lasttime:"<<lastDataUnit.getTime()<<endl;;
+		// cout<<"cal_a0:"<<a<<endl;
+		// if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
+		// 	float ttt = a*g*t/1000;
+		// 	velocity[0] += (a*g*100*t/1000);
+		// 	cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
+		// }
+
+		// if(isrecord)
+		// 	out<<dataUnit[0].getTime()<<"\t"<<a<<
+
+		// for(int i=1;i<4;++i){
+		// 	a = (dataUnit[i-1].getAcc().getX()+dataUnit[i].getAcc().getX())/2;
+		// 	cout<<"cal_a"<<i<<":"<<a<<endl;
+		// 	t = dataUnit[i].getTime() - dataUnit[i-1].getTime();
+		// 	if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
+		// 		velocity[0] += (a*g*100*t/1000);
+		// 		float ttt = a*g*t/1000;
+		// 		cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
+		// 	}
+			
+		// }
+
+		//lastDataUnit.setDataUnit(dataUnit[3]);
+
 
 		// data[i/3] = ((float)d)*16/32768;
 		// data[i/3] = (float)d*2000/32768;
@@ -121,13 +153,15 @@ private:
 	struct timeval tv;
 	unsigned long lasttime;
 	int lastZAngle;
-	static float v;
+	static float velocity[3];
+	static float shifting[3];
 	DataList *dataList;
-	DataUnit lastDataUnit;
-	DataUnit dataUnit[4];
+	//DataUnit lastDataUnit;
+	DataUnit dataUnit[5];//dataunit[4] is lastdataunit
 	
 };
 
-float DataHandler::v = 0.0f;
+float DataHandler::velocity[] = {0.0f,0.0f,0.0f};
+float DataHandler::shifting[] = {0.0f,0.0f,0.0f};
 
 #endif

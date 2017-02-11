@@ -45,7 +45,7 @@ using namespace std;
 //	send(s, data, size, 0);
 //}
 MySocket *sock;
-ofstream out("hello.txt");
+ofstream out("data.txt");
 
 void *threadFunc1(void *arg){
 	while (1){		
@@ -58,6 +58,7 @@ void *threadFunc1(void *arg){
 
 int main()
 {
+
 	sock = MySocket::getInstance();
 	sock->OpenPort();
 	sock->WaitClient();

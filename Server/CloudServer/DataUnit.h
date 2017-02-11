@@ -20,11 +20,14 @@ public:
 	//startPoint is the 9 int data's start position,
 	//we assume we use 9 data from the start position by default
 	DataUnit(int* startPos,int t){
+		if(!isFirst){
+			isFirst = true;
+			timeOffset = t;
+		}
 		acc = Acceleration(startPos[0],startPos[1],startPos[2]);
 		angular = Angular(startPos[3],startPos[4],startPos[5]);
 		angle = Angle(startPos[6],startPos[7],startPos[8]);
-		time = t;
-		//g = 0;
+		time = t - timeOffset;
 		_init();
 	}
 
@@ -35,12 +38,32 @@ public:
 		time = d.getTime();
 	}
 
-	~DataUnit(){
-
+	void setV_X(float vx){
+		velocity[0] = vx;
 	}
 
-	float getTotalAcc(){
-		
+	void setV_Y(float vy){
+		velocity[1] = vy;
+	}
+
+	void setV_Z(float vz){
+		velocity[2] = vz;
+	}
+
+	void setS_X(float sx){
+		shifting[0] = sx;
+	}
+
+	void setS_Y(float sy){
+		shifting[1] = sy;
+	}
+
+	void setS_Z(float sz){
+		shifting[2] = sz;
+	}
+
+	~DataUnit(){
+
 	}
 
 	int getTime(){
@@ -66,7 +89,6 @@ private:
 	//
 
 	void _eliminateAcc(){	
-		//cout<<"g:"<<g<<endl;
 		cout<<"x:"<<acc.getX()<<" y:"<<acc.getY()<<" z:"<<acc.getZ()<<endl;
 		float temp_g[3];
 		temp_g[0] = 2 * (angle.q[1] * angle.q[3] - angle.q[0] * angle.q[2]);///////////////////   /norm
@@ -83,12 +105,16 @@ private:
 	Angular angular;
 	Angle angle;
 	int time;
-	static float g;
+	float velocity[3];
+	float shifting[3];
 	static int cnt;
+	static int timeOffset;
+	static bool isFirst;
 };
 
 int DataUnit::cnt = 0;
-float DataUnit::g = 0;
+int DataUnit::timeOffset = 0;
+bool DataUnit::isFirst = false;
 
 #endif
 

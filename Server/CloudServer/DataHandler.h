@@ -10,7 +10,9 @@
 using namespace std;
 
 #define g 9.8
-#define FILTER_WIDTH 0.0009
+#define ACC_FILTER_WIDTH 0.0009
+#define V_FILTER_WIDTH 0.5
+
 
 class DataHandler{
 public:
@@ -37,35 +39,90 @@ public:
 		time[2] = recvData[46]+recvData[48];
 		time[3] = recvData[46]+recvData[49];
 		for(int i=0;i<4;++i){
-			//cout<<"construct dataunit-"<<i<<":"<<endl;
 			dataUnit[i] = DataUnit(recvData+(i*9+10),time[i]);
-			//cout<<"datahandler time:"<<dataUnit[i].getTime()<<endl;
-			dataList->addDataUnit(recvData+(i*9+10),time[i]);
 		}
 
 		float a;
 		float t;
 
 		for(int i=0;i<4;++i){
+			
+			dataList->addDataUnit(recvData+(i*9+10),time[i]);
+			dataList->setTotalVelocity(getVelocity());
 			///////ax
-			a = (dataUnit[(i-1+5)%5].getAcc().getX()+dataUnit[i].getAcc().getX())/2;
-			cout<<"cal_a"<<i<<":"<<a<<endl;
-			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
-			if(a>=FILTER_WIDTH||a<=-FILTER_WIDTH){
-				velocity[0] += (a*g*100*t/1000);
-				float ttt = a*g*t/1000;
-				cout<<"plus:"<<ttt*100<<"cm/s"<<endl;
+			float tempa = dataUnit[i].getAcc().getX() - dataUnit[(i-1+5)%5].getAcc().getX();
+			if(tempa>0.105 && tempa<0.14)
+				dataUnit[i].getAcc().setAcc(dataUnit[i].getAcc().getX()-tempa,dataUnit[i].getAcc().getY(),dataUnit[i].getAcc().getZ());
+			else if(tempa>=0.14){
+				if(i<3){
+					float _x = (dataUnit[(i-1+5)%5].getAcc().getX()+dataUnit[i+1].getAcc().getX())/2;
+					dataUnit[i].getAcc().setAcc(_x,dataUnit[i].getAcc().getY(),dataUnit[i].getAcc().getZ());
+				}
+				else
+					dataUnit[i].getAcc().setAcc(dataUnit[i].getAcc().getX()-tempa,dataUnit[i].getAcc().getY(),dataUnit[i].getAcc().getZ());
 			}
-			if(isrecord&&out.is_open())
-				out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\t"<<velocity[0]<<"\t";
+
+			a = (dataUnit[(i-1+5)%5].getAcc().getX()+dataUnit[i].getAcc().getX())/2;
+			cout<<"cal_ax"<<i<<":"<<a<<endl;
+			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
+			float plus = 0.0f;
+			if(a>=ACC_FILTER_WIDTH||a<=-ACC_FILTER_WIDTH){
+				velocity[0] += (a*g*100*t/1000);
+				plus = a*g*100*t/1000;
+				cout<<"plus_x:"<<plus<<"cm/s"<<endl;
+			}
+			//if(fabs(velocity[0])<dataList->getStaticWidth())
+			if(dataList->isStatic())
+				velocity[0] = 0.0f;
+			if(fabs(velocity[0])>V_FILTER_WIDTH)
+				shifting[0] += (velocity[0]*t/1000);
+			// if(isrecord&&out.is_open())
+			// 	out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\t"<<velocity[0]<<"\t"<<shifting[0]<<"\t";//"\t"<<plus<<
+			dataList.getDataUnitThisLoop(i).setV_X(velocity[0]);
+			dataList.getDataUnitThisLoop(i).setS_X(shifting[0]);
+
 
 			///////ay
+			plus = 0.0f;
+			a = (dataUnit[(i-1+5)%5].getAcc().getY()+dataUnit[i].getAcc().getY())/2;
+			cout<<"cal_ay"<<i<<":"<<a<<endl;
+			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
+			if(a>=ACC_FILTER_WIDTH||a<=-ACC_FILTER_WIDTH){
+				velocity[1] += (a*g*100*t/1000);
+				plus = a*g*100*t/1000;
+				cout<<"plus_y:"<<plus<<"cm/s"<<endl;
+			}
+			//if(fabs(velocity[0])<dataList->getStaticWidth())
+			if(dataList->isStatic())
+				velocity[1] = 0.0f;
+			if(fabs(velocity[1])>V_FILTER_WIDTH)
+				shifting[1] += (velocity[1]*t/1000);
+			//out<<dataUnit[i].getAcc().getY()<<"\t"<<velocity[1]<<"\t"<<shifting[1]<<"\t";//"\t"<<plus<<
+			dataList.getDataUnitThisLoop(i).setV_Y(velocity[1]);
+			dataList.getDataUnitThisLoop(i).setS_Y(shifting[1]);
 
 			///////az
+			plus = 0.0f;			
+			a = (dataUnit[(i-1+5)%5].getAcc().getZ()+dataUnit[i].getAcc().getZ())/2;
+			cout<<"cal_az"<<i<<":"<<a<<endl;
+			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
+			if(a>=ACC_FILTER_WIDTH||a<=-ACC_FILTER_WIDTH){
+				velocity[2] += (a*g*100*t/1000);
+				plus = a*g*100*t/1000;
+				cout<<"plus_z:"<<plus<<"cm/s"<<endl;
+			}
+			//if(fabs(velocity[0])<dataList->getStaticWidth())
+			if(dataList->isStatic())
+				velocity[2] = 0.0f;
+			if(fabs(velocity[2])>V_FILTER_WIDTH)
+				shifting[2] += (velocity[2]*t/1000);
+			//out<<dataUnit[i].getAcc().getZ()<<"\t"<<velocity[2]<<"\t"<<shifting[2]<<"\t";//"\t"<<plus<<
+			dataList.getDataUnitThisLoop(i).setV_Z(velocity[2]);
+			dataList.getDataUnitThisLoop(i).setS_Z(shifting[2]);
 
 			///////total acc
-			if(isrecord&&out.is_open())
-				out<<dataUnit[i].getAcc().getTotalAcc()<<"\r\n";
+			// if(isrecord&&out.is_open())
+			// 	out<<dataUnit[i].getAcc().getTotalAcc()<<"\t"<<getVelocity()<<"\r\n";
 
 
 			//////isStatic,vx = vy = vz = 0;
@@ -141,6 +198,10 @@ public:
 
 		// cout<<endl;
 
+	}
+
+	float getVelocity(){
+		return sqrt(velocity[0]*velocity[0]+velocity[1]*velocity[1]+velocity[1]*velocity[1]);
 	}
 
 	~DataHandler(){

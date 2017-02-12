@@ -29,7 +29,8 @@ public class Hand : MonoBehaviour {
         //SetXYZRotation();
         //if (z_cnt % 30 == 0)
         {
-            TestXYZRotation();
+            SetXYZRotation();
+            //TestXYZRotation();
             z_cnt = 1;
         }
         ++z_cnt;
@@ -95,6 +96,7 @@ public class Hand : MonoBehaviour {
     {
         if (Index.IsReady())
         {
+            Debug.Log("set");
             Vector3 r =Index.getRotation();
             //hand.transform.localEulerAngles = r;
             //Debug.Log("rotate to:" + r.x + "," + r.y + "," + r.z);

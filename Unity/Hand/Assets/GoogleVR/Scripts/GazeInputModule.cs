@@ -108,6 +108,7 @@ public class GazeInputModule : BaseInputModule {
   }
 
   public override void Process() {
+      //Debug.Log("sssss");
     // Save the previous Game Object
     GameObject gazeObjectPrevious = GetCurrentGameObject();
 
@@ -125,11 +126,13 @@ public class GazeInputModule : BaseInputModule {
 
     // Handle input
     if (!Input.GetMouseButtonDown(0) && Input.GetMouseButton(0)) {
+        Debug.Log("uuuuu");
       HandleDrag();
     } else if (Time.unscaledTime - pointerData.clickTime < clickTime) {
       // Delay new events until clickTime has passed.
     } else if (!pointerData.eligibleForClick &&
         (isGvrTriggered || Input.GetMouseButtonDown(0))) {
+
       // New trigger action.
       HandleTrigger();
     } else if (handlePendingClickRequired) {
@@ -206,6 +209,7 @@ public class GazeInputModule : BaseInputModule {
   }
 
   private void HandleDrag() {
+
     bool moving = pointerData.IsPointerMoving();
 
     if (moving && pointerData.pointerDrag != null && !pointerData.dragging) {

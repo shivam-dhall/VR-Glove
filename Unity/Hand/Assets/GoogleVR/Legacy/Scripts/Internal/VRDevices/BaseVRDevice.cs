@@ -209,6 +209,7 @@ namespace Gvr.Internal {
       if (device == null) {
 #if UNITY_EDITOR
         device = new EditorDevice();
+        //Debug.Log("tttt");
 #elif ANDROID_DEVICE
     #if UNITY_HAS_GOOGLEVR
         device = new UnityVRDevice();

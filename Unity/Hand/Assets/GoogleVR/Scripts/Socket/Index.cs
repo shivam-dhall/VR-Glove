@@ -8,7 +8,10 @@ public class Index : MonoBehaviour {
     static bool isReady = false;
     private MyTcpIpClient client = null;
     static private int[] dataArray = new int[22];
+    static private Vector3 referRotation;
     static private Vector3 rotation = new Vector3(0, 0, 0);
+    static private Vector3 shifting = new Vector3(0, 0, 0);
+    static private bool isInit = true;
 
     void Awake()
     {
@@ -30,18 +33,37 @@ public class Index : MonoBehaviour {
     {
         isReady = false;
         string s = "";
-        for (int i = 0; i < 22; ++i)
+        byte[] temp = new byte[4];
+        for (int i = 0; i < 6; ++i)
         {
-            dataArray[i] = (int)((a[i*4] & 0xFF << 24)
-                                | ((a[i*4+1] & 0xFF) << 16)
-                                | ((a[i*4+2] & 0xFF) << 8)
-                                | ((a[i*4+3] & 0xFF)));
+            for (int j = 0; j < 4;++j )
+                temp[j] = a[i * 4 + (3-j)];
+            dataArray[i] = System.BitConverter.ToInt32(temp, 0);
             s += (dataArray[i] + " ");
+           
         }
         data = System.Text.Encoding.Default.GetString(a);
-        Debug.Log("data" + s);
+        Debug.Log("data:" + s);
         //Debug.Log(data[0]+" "+data[data.Length-1]);
+        if (isInit)
+        {
+            referRotation = new Vector3(0 - dataArray[3], 0 - dataArray[5], 0 - dataArray[4]);
+            //Debug.Log("refer:" + referRotation.x + "," + referRotation.y + "," + referRotation.z);
+            isInit = false;
+        }
+        shifting.x = dataArray[0] / 100;
+        shifting.y = dataArray[2] / 100;
+        shifting.z = dataArray[1] / 100;
+
+
+
+        rotation.x = dataArray[3]/100;
+        rotation.y = dataArray[5]/100;
+        //rotation.y = dataArray[21];
+        rotation.z = dataArray[4]/100;
+        //rotation += referRotation;
         isReady = true;
+        Debug.Log("end");
     }
 
     static public void print(string s)
@@ -56,7 +78,13 @@ public class Index : MonoBehaviour {
 
     static public Vector3 getRotation()
     {
-        return new Vector3(dataArray[19], dataArray[20], dataArray[21]);
+        //isReady = false;
+        return rotation;
+    }
+
+    static public Vector3 getShifting()
+    {
+        return shifting;
     }
 
 }

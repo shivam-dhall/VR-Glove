@@ -39,6 +39,7 @@ public class ControllerDemoManager : MonoBehaviour {
   void Update() {
     UpdatePointer();
     UpdateStatusMessage();
+    Debug.Log("opaopkdcnjs");
   }
 
   private void UpdatePointer() {

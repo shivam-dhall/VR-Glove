@@ -69,6 +69,7 @@ namespace clinet
         /// 数据接收处理//////// ,bytesRead是这次接收到的包的一部分数据size，如果没接收完，继续调用自己，直到没有数据
         private void ReceiveCallback(IAsyncResult ar)
         {
+
             Socket handler = null;
             try
             {
@@ -133,6 +134,7 @@ namespace clinet
                     {
                         pos = 0;
                         this.isOnceFinished = true;
+                        Index.print("setdata");
                         Index.SetData(data);
                     }
 
@@ -223,13 +225,14 @@ namespace clinet
         {
             if (isConnect)
             {
+                //Index.print("receive");
                 connectDone.WaitOne();
                 
                 StateObject Cstate = new StateObject(bufferSize, ClientSocket);
                 if (this.isOnceFinished)
                 {
                     this.isOnceFinished = false;
-                    ClientSocket.BeginReceive(Cstate.buffer, 0, 93, 0,
+                    ClientSocket.BeginReceive(Cstate.buffer, 0, 29, 0,
                     new AsyncCallback(ReceiveCallback), Cstate);
                 }
             }

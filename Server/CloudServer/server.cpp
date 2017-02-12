@@ -62,7 +62,7 @@ int main()
 	sock = MySocket::getInstance();
 	sock->OpenPort();
 	sock->WaitClient();
-	//sock->WaitClient();
+	sock->WaitClient();
 		
 	pthread_t tid1;
 	int err;

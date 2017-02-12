@@ -34,7 +34,7 @@ public:
 	}
 
 	DataUnit& getDataUnitThisLoop(int i){
-		return dataList[(index+MAX_LENGTH-(4-i))%MAX_LENGTH]
+		return dataList[(index+MAX_LENGTH-(4-i))%MAX_LENGTH];
 	}
 
 	void addDataUnit(int* startPos,int t){
@@ -51,17 +51,18 @@ public:
 			if(fabs(dataList[index-1].getAcc().getTotalAcc())<=(TOTAL_STATIC_WIDTH/2))
 				++staticCnt;
 			if(staticCnt >= STATIC_CNT)
-				;//notStaticCnt = 0;
+				notStaticCnt = 0;
 		}
 		else{
 			++notStaticCnt;
 			if(staticCnt>=STATIC_CNT){
-				//deleteDataUnit(header,index);
+				deleteDataUnit(header,index);
 				staticCnt = 0;
 				notStaticCnt = 0;
 			}
 			if(notStaticCnt>=NOT_STATIC_CNT)
 				staticCnt = 0; 
+
 		}
 
 		if(index>=MAX_LENGTH)

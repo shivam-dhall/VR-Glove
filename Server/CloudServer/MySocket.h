@@ -73,8 +73,10 @@ public:
 
 	void BeginWork(ofstream& out){
 		cout << "-----------" <<(++cnt)<< endl;
-		if(connArduino==-1)
+		if(connArduino==-1){
+			cout<<"didnt connect arduino"<<endl;
 			return;
+		}
 		///int len = _ReceiveData(connArduino);
 		memset(receiveData,0,sizeof(receiveData));
 		int len = recv(connArduino, receiveData, bufferSize1,0);
@@ -129,6 +131,18 @@ public:
 				isrecord = true;
 
 			dataHandler.handleRecvData(out,isrecord);
+
+			if(cnt%2==0){
+				int temp[6];
+				float* shift = dataHandler.getModifyShifting();
+				for(int i=0;i<3;++i)
+					temp[i] = (int)(shift[i]*100);
+				temp[3] = (int)(dataHandler.getXAngle()*100);
+				temp[4] = (int)(dataHandler.getYAngle()*100);
+				temp[5] = (int)(dataHandler.getZAngle()*100);
+				_SendData(connUnity,temp,6,1);
+				dataHandler.return2Zero();
+			}
 
 			// Print();
 			// gettimeofday(&tv,0);  
@@ -277,38 +291,69 @@ private:
 			cout<<"not connect"<<endl;
 			return;
 		}
-		memset(buffer,0,sizeof(buffer));
-
+		char bbb[29];
 		size *= 4;
 
-		buffer[0] = (char)((size >> 24) & 0xFF);
-		buffer[1] = (char)((size >> 16) & 0xFF);
-		buffer[2] = (char)((size >> 8) & 0xFF);
-		buffer[3] = (char)(size & 0xFF);
-		buffer[4] = (char)(type & 0xFF);
+		bbb[0] = (char)((size >> 24) & 0xFF);
+		bbb[1] = (char)((size >> 16) & 0xFF);
+		bbb[2] = (char)((size >> 8) & 0xFF);
+		bbb[3] = (char)(size & 0xFF);
+		bbb[4] = (char)(type & 0xFF);
 		for(int i=0;i<size/4;++i)
 			cout<<arr[i]<<"--";
 		cout<<endl;
 
+		//
 		for(int i=0;i<size/4;++i){
-			buffer[i*4+5] = (char)((arr[i] >> 24) & 0xFF);
-			buffer[i*4+6] = (char)((arr[i] >> 16) & 0xFF);
-			buffer[i*4+7] = (char)((arr[i] >> 8) & 0xFF);
-			buffer[i*4+8] = (char)((arr[i]) & 0xFF);
+			bbb[i*4+5] = (char)((arr[i] >> 24) & 0xFF);
+			bbb[i*4+6] = (char)((arr[i] >> 16) & 0xFF);
+			bbb[i*4+7] = (char)((arr[i] >> 8) & 0xFF);
+			bbb[i*4+8] = (char)((arr[i]) & 0xFF);
 		}
 
-		char *index = buffer;		
+		char *index = bbb;		
 		int ret = size + 5;
 		cout<<"send "<<ret<<"data:";
 		for(int i=0;i<ret;++i)
-			cout<<(int)buffer[i]<<",";
+			cout<<(int)bbb[i]<<",";
 		cout<<endl;
-		while(ret>0){
-			int sendSize = (ret<bufferSize?ret:bufferSize);
-			send(conn, index, sendSize,0);
-			ret -= sendSize;
-			index += sendSize;
-		}
+		send(conn, index, size+5,0);
+
+
+
+		// memset(buffer,0,sizeof(buffer));
+
+		// size *= 4;
+
+		// buffer[0] = (char)((size >> 24) & 0xFF);
+		// buffer[1] = (char)((size >> 16) & 0xFF);
+		// buffer[2] = (char)((size >> 8) & 0xFF);
+		// buffer[3] = (char)(size & 0xFF);
+		// buffer[4] = (char)(type & 0xFF);
+		// for(int i=0;i<size/4;++i)
+		// 	cout<<arr[i]<<"--";
+		// cout<<endl;
+
+		// //
+		// for(int i=0;i<size/4;++i){
+		// 	buffer[i*4+5] = (char)((arr[i] >> 24) & 0xFF);
+		// 	buffer[i*4+6] = (char)((arr[i] >> 16) & 0xFF);
+		// 	buffer[i*4+7] = (char)((arr[i] >> 8) & 0xFF);
+		// 	buffer[i*4+8] = (char)((arr[i]) & 0xFF);
+		// }
+
+		// char *index = buffer;		
+		// int ret = size + 5;
+		// cout<<"send "<<ret<<"data:";
+		// for(int i=0;i<ret;++i)
+		// 	cout<<(int)buffer[i]<<",";
+		// cout<<endl;
+		// while(ret>0){
+		// 	int sendSize = (ret<bufferSize?ret:bufferSize);
+		// 	send(conn, index, sendSize,0);
+		// 	ret -= sendSize;
+		// 	index += sendSize;
+		// }
 	}
 
 

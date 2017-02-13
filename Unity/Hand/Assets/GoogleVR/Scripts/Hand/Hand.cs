@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class Hand : MonoBehaviour {
@@ -11,11 +12,16 @@ public class Hand : MonoBehaviour {
     public GameObject hand;
     public GameObject camera;
     public GameObject cube;
+    public GameObject text;
     int xSpeed = 10;
     int ySpeed = 10;
     int zSpeed = 10;
     int cnt = 0;
     int z_cnt = 1;
+    static private Vector3 referRotation = new Vector3(0, 0, 0);
+    bool isInit = false;
+    float lastCameraY = 0.0f;
+    float lastRcvY = 0.0f;
 
 	// Use this for initialization
 	void Start () {
@@ -31,15 +37,22 @@ public class Hand : MonoBehaviour {
         {
             SetXYZRotation();
             //TestXYZRotation();
-            z_cnt = 1;
+            //z_cnt = 1;
         }
         ++z_cnt;
+        float scale = 0.01f;
+        float x = (float)(hand.transform.forward.x * scale);
+        Vector3 v = new Vector3((float)(hand.transform.forward.x * scale),
+            (float)(hand.transform.forward.y * scale), (float)(hand.transform.forward.z * scale));
+        hand.transform.position += v;
+        
         //SetXYZRotation();
 	}
 
     void TestXYZRotation()
     {
         Vector3 r = Index.getRotation(); //new Vector3(90, cnt, 0);
+        
         cnt++;
         float angle = r.y;
         r.y = 0;
@@ -94,15 +107,77 @@ public class Hand : MonoBehaviour {
     //use the gyro to show the rotation of xyz axis
     void SetXYZRotation()
     {
+        float angle = camera.transform.localEulerAngles.y - lastCameraY;
         if (Index.IsReady())
         {
-            Debug.Log("set");
             Vector3 r =Index.getRotation();
-            //hand.transform.localEulerAngles = r;
-            //Debug.Log("rotate to:" + r.x + "," + r.y + "," + r.z);
-            ex = r.x;
-            ey = r.y;
-            ez = r.z;
+            Vector3 rr = getReferRotation();
+            if (isInit)
+            {
+                ex = r.x;
+                ey = r.y;
+                ez = r.z;
+
+                ex = ex * PIover180 / 2.0f;
+                ey = ey * PIover180 / 2.0f;
+                ez = ez * PIover180 / 2.0f;
+                qx = Mathf.Sin(ex) * Mathf.Cos(ey) * Mathf.Cos(ez) - Mathf.Cos(ex) * Mathf.Sin(ey) * Mathf.Sin(ez);
+                qy = Mathf.Cos(ex) * Mathf.Sin(ey) * Mathf.Cos(ez) - Mathf.Sin(ex) * Mathf.Cos(ey) * Mathf.Sin(ez);
+                qz = Mathf.Cos(ex) * Mathf.Cos(ey) * Mathf.Sin(ez) + Mathf.Sin(ex) * Mathf.Sin(ey) * Mathf.Cos(ez);
+                qw = Mathf.Cos(ex) * Mathf.Cos(ey) * Mathf.Cos(ez) + Mathf.Sin(ex) * Mathf.Sin(ey) * Mathf.Sin(ez);
+
+                Quaternion q = new Quaternion(qx, qy, qz, qw);
+                cube.transform.rotation = q;
+
+                Vector3 v = cube.transform.localEulerAngles;
+                float change = v.y - lastRcvY;
+                //v += rr;
+                //float temp = v.z;
+                //v.z = v.x;
+                //v.x = -temp;
+                //v.y = -v.y;
+                float yyy = camera.transform.localEulerAngles.y;
+                //Debug.Log("v.y:" + v.y + " camera.y:" + yyy + " after v.y:" + (camera.transform.localEulerAngles.y + v.y));
+                ////Vector3 cameraVec = camera.transform.localEulerAngles;
+                ////v.y += (camera.transform.localEulerAngles.y);
+
+                ////if(System.Math.Abs(yyy)>1)
+                ////    text.GetComponent<Text>().text = 
+                ////    ("v.y:" + (v.y + 360) % 360 + "\ncam.y:" + (yyy + 360) % 360)+"\nchu:"+(v.y/yyy)+" jian:"+(v.y-yyy);
+
+                float minus = yyy - lastCameraY;
+                if (System.Math.Abs(minus) > 0.1)
+                {
+                    //float change = hand.transform.localEulerAngles.y - (getReferRotation().y + v.y);
+                    //referRotation.y += change;
+                    Debug.Log("not change:" + lastRcvY + " " + v.y + " " + change);
+                    
+                }
+                else
+                {
+                    Debug.Log("change:" + lastRcvY + " " + v.y + " " + change);
+                    Vector3 t_v = new Vector3(-v.z, hand.transform.localEulerAngles.y - change, v.x);
+                    hand.transform.localEulerAngles = t_v;
+
+                }
+                lastRcvY = v.y;
+                
+                
+            }
+        }
+        
+        lastCameraY = camera.transform.localEulerAngles.y;
+
+    }
+
+    Vector3 getReferRotation()
+    {
+        if (Index.getIsInit()&&!isInit)
+        {
+            isInit = true;
+            ex = referRotation.x;
+            ey = referRotation.y;
+            ez = referRotation.z;
 
             ex = ex * PIover180 / 2.0f;
             ey = ey * PIover180 / 2.0f;
@@ -110,21 +185,26 @@ public class Hand : MonoBehaviour {
             qx = Mathf.Sin(ex) * Mathf.Cos(ey) * Mathf.Cos(ez) - Mathf.Cos(ex) * Mathf.Sin(ey) * Mathf.Sin(ez);
             qy = Mathf.Cos(ex) * Mathf.Sin(ey) * Mathf.Cos(ez) - Mathf.Sin(ex) * Mathf.Cos(ey) * Mathf.Sin(ez);
             qz = Mathf.Cos(ex) * Mathf.Cos(ey) * Mathf.Sin(ez) + Mathf.Sin(ex) * Mathf.Sin(ey) * Mathf.Cos(ez);
-
-
             qw = Mathf.Cos(ex) * Mathf.Cos(ey) * Mathf.Cos(ez) + Mathf.Sin(ex) * Mathf.Sin(ey) * Mathf.Sin(ez);
 
             Quaternion q = new Quaternion(qx, qy, qz, qw);
+            cube.transform.rotation = q;
+            Vector3 v = cube.transform.localEulerAngles;
 
-            hand.transform.rotation = q;
-            Vector3 v = hand.transform.localEulerAngles;
-            v.z= -v.z;
-            v.x = -v.x;
-            v.y = -v.y;
-            hand.transform.localEulerAngles = v;
+            lastRcvY = v.y;
+            Debug.Log("first:" + lastRcvY);
+
+            referRotation.x = -v.x;
+            referRotation.y = -v.y;
+            referRotation.z = -v.z;
         }
-
+        return referRotation;
     }
+
+    static public void SetReferRotation(Vector3 v)
+    {
+        referRotation = v;
+    } 
 
     void PlayAnimation()
     {

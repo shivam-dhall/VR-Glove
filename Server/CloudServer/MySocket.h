@@ -139,7 +139,7 @@ public:
 					temp[i] = (int)(shift[i]*100);
 				temp[3] = (int)(dataHandler.getXAngle()*100);
 				temp[4] = (int)(dataHandler.getYAngle()*100);
-				temp[5] = (int)(dataHandler.getZAngle()*100);
+				temp[5] = (int)(dataHandler.getZAngle(cnt)*100);
 				_SendData(connUnity,temp,6,1);
 				dataHandler.return2Zero();
 			}
@@ -175,7 +175,6 @@ public:
 			// }
 			
 		}
-		//cout<<endl;
 
 		
 	}

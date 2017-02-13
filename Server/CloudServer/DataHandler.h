@@ -12,17 +12,15 @@ using namespace std;
 #define g 9.8
 #define ACC_FILTER_WIDTH 0.0009
 #define V_FILTER_WIDTH 0.5
-
+#define ZAngle_FILTER_WIDTH 1.8
 
 class DataHandler{
 public:
 	DataHandler(){
 		dataUnit[4] = DataUnit();
 		dataList = DataList::getInstance();
-		modifyZAngle = 0.0f;
+		zAngle = 0.0f;
 		modifyShifting[0] = modifyShifting[1] = modifyShifting[2] = 0.0f;
-		//ofstream out;
-		//out.open("hello.txt");
 	}
 
 	void setRecvData(int d, int i){
@@ -61,7 +59,8 @@ public:
 					dataUnit[i].getAcc().setAcc(_x,dataUnit[i].getAcc().getY(),dataUnit[i].getAcc().getZ());
 				}
 				else{
-					dataUnit[i].getAcc().setAcc(dataUnit[i].getAcc().getX()-tempa,dataUnit[i].getAcc().getY(),dataUnit[i].getAcc().getZ());
+					dataUnit[i].getAcc().setAcc(dataUnit[i].getAcc().getX()-tempa,
+						dataUnit[i].getAcc().getY(),dataUnit[i].getAcc().getZ());
 				}
 			}
 
@@ -134,9 +133,19 @@ public:
 
 			///////total acc
 			if(isrecord&&out.is_open())
-				out<<dataUnit[i].getAcc().getTotalAcc()<<"\t"<<getVelocity()<<"\r\n";
+				out<<dataUnit[i].getAcc().getTotalAcc()<<"\t"<<getVelocity()<<"\t"<<dataUnit[i].getAngular().getZ()<<"\r\n";
+
 		}
 		cout<<"-----------------v0:"<<velocity[0]<<endl;
+
+		int zCnt = 0;
+		for(int i=0;i<4;++i){
+			if(fabs(dataUnit[i].getAngular().getZ())>ZAngle_FILTER_WIDTH)
+				++zCnt;
+		}
+
+		if(zCnt>3)
+			zAngle = dataUnit[3].getAngle().getZ();
 
 		dataUnit[4].setDataUnit(dataUnit[3]);
 
@@ -147,9 +156,6 @@ public:
 		return modifyShifting;
 	}
 
-	float getModifyZAngle(){
-		return modifyZAngle;
-	}
 
 	float getXAngle(){
 		return dataUnit[3].getAngle().getX();
@@ -159,12 +165,15 @@ public:
 		return dataUnit[3].getAngle().getY();
 	}
 
-	float getZAngle(){
-		return dataUnit[3].getAngle().getZ();
+	float getZAngle(int cnt){
+		if(cnt>2)
+			return zAngle;
+		else
+			return dataUnit[3].getAngle().getZ();
 	}
 
 	void return2Zero(){
-		modifyShifting[0] = modifyShifting[1] = modifyShifting[2] = modifyZAngle = 0.0f;
+		modifyShifting[0] = modifyShifting[1] = modifyShifting[2] = 0.0f;
 	}
 
 	void printRecvData(){
@@ -217,7 +226,7 @@ private:
 	DataList *dataList;
 	//DataUnit lastDataUnit;
 	DataUnit dataUnit[5];//dataunit[4] is lastdataunit
-	float modifyZAngle;
+	float zAngle;
 	float modifyShifting[3];
 };
 

@@ -8,10 +8,10 @@ public class Index : MonoBehaviour {
     static bool isReady = false;
     private MyTcpIpClient client = null;
     static private int[] dataArray = new int[22];
-    static private Vector3 referRotation;
+    
     static private Vector3 rotation = new Vector3(0, 0, 0);
     static private Vector3 shifting = new Vector3(0, 0, 0);
-    static private bool isInit = true;
+    static private bool isInit = false;
 
     void Awake()
     {
@@ -31,7 +31,7 @@ public class Index : MonoBehaviour {
 
     static public void SetData(byte[]a)
     {
-        isReady = false;
+        //isReady = false;
         string s = "";
         byte[] temp = new byte[4];
         for (int i = 0; i < 6; ++i)
@@ -43,19 +43,17 @@ public class Index : MonoBehaviour {
            
         }
         data = System.Text.Encoding.Default.GetString(a);
-        Debug.Log("data:" + s);
+        //Debug.Log("data:" + s);
         //Debug.Log(data[0]+" "+data[data.Length-1]);
-        if (isInit)
+        if (!isInit)
         {
-            referRotation = new Vector3(0 - dataArray[3], 0 - dataArray[5], 0 - dataArray[4]);
+            Hand.SetReferRotation(new Vector3(dataArray[3]/100,dataArray[5]/100,dataArray[4]/100));
             //Debug.Log("refer:" + referRotation.x + "," + referRotation.y + "," + referRotation.z);
-            isInit = false;
+            isInit = true;
         }
         shifting.x = dataArray[0] / 100;
         shifting.y = dataArray[2] / 100;
         shifting.z = dataArray[1] / 100;
-
-
 
         rotation.x = dataArray[3]/100;
         rotation.y = dataArray[5]/100;
@@ -64,6 +62,16 @@ public class Index : MonoBehaviour {
         //rotation += referRotation;
         isReady = true;
         Debug.Log("end");
+    }
+
+    static public bool getIsInit()
+    {
+        return isInit;
+    }
+
+    static public void setIsInit(bool i)
+    {
+        isInit = i;
     }
 
     static public void print(string s)
@@ -75,6 +83,7 @@ public class Index : MonoBehaviour {
     {
         return isReady;
     }
+
 
     static public Vector3 getRotation()
     {

@@ -69,7 +69,6 @@ namespace clinet
         /// 数据接收处理//////// ,bytesRead是这次接收到的包的一部分数据size，如果没接收完，继续调用自己，直到没有数据
         private void ReceiveCallback(IAsyncResult ar)
         {
-
             Socket handler = null;
             try
             {
@@ -134,7 +133,6 @@ namespace clinet
                     {
                         pos = 0;
                         this.isOnceFinished = true;
-                        Index.print("setdata");
                         Index.SetData(data);
                     }
 

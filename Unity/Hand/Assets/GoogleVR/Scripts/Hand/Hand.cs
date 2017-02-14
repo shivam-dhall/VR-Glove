@@ -3,6 +3,11 @@ using UnityEngine.UI;
 using System.Collections;
 
 public class Hand : MonoBehaviour {
+    public enum ShiftingType{
+        X,
+        Y,
+        Z
+    }
 
     float ex, ey, ez;
     //用于记录计算结果  
@@ -22,6 +27,7 @@ public class Hand : MonoBehaviour {
     bool isInit = false;
     float lastCameraY = 0.0f;
     float lastRcvY = 0.0f;
+    static float scale = 0.01f;
 
 	// Use this for initialization
 	void Start () {
@@ -32,21 +38,15 @@ public class Hand : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //SetXYZRotation();
-        //if (z_cnt % 30 == 0)
-        {
-            SetXYZRotation();
-            //TestXYZRotation();
-            //z_cnt = 1;
-        }
-        ++z_cnt;
-        float scale = 0.01f;
-        float x = (float)(hand.transform.forward.x * scale);
-        Vector3 v = new Vector3((float)(hand.transform.forward.x * scale),
-            (float)(hand.transform.forward.y * scale), (float)(hand.transform.forward.z * scale));
-        hand.transform.position += v;
+
+        SetXYZRotation();
+        SetXYZPosition();
         
-        //SetXYZRotation();
+        //float x = (float)(hand.transform.forward.x * scale);
+        //Vector3 v = new Vector3((float)(hand.transform.forward.x * scale),
+        //    (float)(hand.transform.forward.y * scale), (float)(hand.transform.forward.z * scale));
+        //hand.transform.position += v;
+
 	}
 
     void TestXYZRotation()
@@ -104,6 +104,19 @@ public class Hand : MonoBehaviour {
         //hand.transform.localEulerAngles = v;
     }
 
+    public void SetXYZPosition()
+    {
+        if (Index.IsReady())
+        {
+            Vector3 s = Index.getShifting();
+            hand.transform.position += getShiftVec(s.x, ShiftingType.X);
+            Index.ResetShifting();
+            //hand.transform.localPosition;
+            //hand.transform.position += getShiftVec(s.y, ShiftingType.Y);
+            //hand.transform.position += getShiftVec(s.z, ShiftingType.Z);
+        }
+    }
+
     //use the gyro to show the rotation of xyz axis
     void SetXYZRotation()
     {
@@ -150,12 +163,12 @@ public class Hand : MonoBehaviour {
                 {
                     //float change = hand.transform.localEulerAngles.y - (getReferRotation().y + v.y);
                     //referRotation.y += change;
-                    Debug.Log("not change:" + lastRcvY + " " + v.y + " " + change);
+                    //Debug.Log("not change:" + lastRcvY + " " + v.y + " " + change);
                     
                 }
                 else
                 {
-                    Debug.Log("change:" + lastRcvY + " " + v.y + " " + change);
+                    //Debug.Log("change:" + lastRcvY + " " + v.y + " " + change);
                     Vector3 t_v = new Vector3(-v.z, hand.transform.localEulerAngles.y - change, v.x);
                     hand.transform.localEulerAngles = t_v;
 
@@ -192,7 +205,7 @@ public class Hand : MonoBehaviour {
             Vector3 v = cube.transform.localEulerAngles;
 
             lastRcvY = v.y;
-            Debug.Log("first:" + lastRcvY);
+            //Debug.Log("first:" + lastRcvY);
 
             referRotation.x = -v.x;
             referRotation.y = -v.y;
@@ -204,7 +217,29 @@ public class Hand : MonoBehaviour {
     static public void SetReferRotation(Vector3 v)
     {
         referRotation = v;
-    } 
+    }
+
+    Vector3 getShiftVec(float distance, ShiftingType type)
+    {
+        Vector3 v = new Vector3(0, 0, 0);
+        switch(type){
+            case ShiftingType.X:
+                v = hand.transform.right;
+                break;
+            case ShiftingType.Y:
+                v = hand.transform.up;
+                break;
+            case ShiftingType.Z:
+                v = hand.transform.forward;
+                break;
+        }
+       
+        v.x *= (scale * distance);
+        v.y *= (scale * distance);
+        v.z *= (scale * distance);
+        Debug.Log("shiftVec:" + v.x);//+ " " + v.y + " " + v.z
+        return v;
+    }
 
     void PlayAnimation()
     {

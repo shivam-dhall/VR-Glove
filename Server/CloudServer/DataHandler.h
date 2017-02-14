@@ -33,6 +33,31 @@ public:
 	}
 
 	void handleRecvData(ofstream &out,bool isrecord){
+		cout<<"recvdata:";
+		for(int i=0;i<10;++i)
+			cout<<recvData[i]<<" ";
+		cout<<endl;
+		float const_res = 20000.0f;
+		float curr1 = recvData[3]/const_res;
+		resistance[0] = (recvData[2] - recvData[3])/curr1;
+		resistance[1] = (recvData[1] - recvData[2])/curr1;
+		resistance[2] = (recvData[0] - recvData[3])/curr1;
+		resistance[3] = (32767 - recvData[1])/curr1;
+
+		float curr2 = recvData[9]/const_res;
+		resistance[4] = (recvData[8] - recvData[9])/curr2;
+		resistance[5] = (recvData[7] - recvData[8])/curr2;
+		resistance[6] = (recvData[6] - recvData[7])/curr2;
+		resistance[7] = (recvData[5] - recvData[6])/curr2;
+		resistance[8] = (recvData[4] - recvData[5])/curr2;
+		resistance[9] = (1024 - recvData[4])/curr2;
+
+		cout<<"resistance:";
+		for(int i=0;i<10;++i)
+			cout<<resistance[i]<<" ";
+		cout<<endl;
+
+
 		int time[4];
 		time[0] = recvData[46];
 		time[1] = recvData[46]+recvData[47];
@@ -65,14 +90,14 @@ public:
 			}
 
 			a = (dataUnit[(i-1+5)%5].getAcc().getX()+dataUnit[i].getAcc().getX())/2;
-			cout<<"cal_ax"<<i<<":"<<a<<endl;
+			//--cout<<"cal_ax"<<i<<":"<<a<<endl;
 			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
 			float plus = 0.0f;
 			if(a>=ACC_FILTER_WIDTH||a<=-ACC_FILTER_WIDTH){
 				velocity[0] += (a*g*100*t/1000);
 				
 				plus = a*g*100*t/1000;
-				cout<<"plus_x:"<<plus<<"cm/s"<<endl;
+				//--cout<<"plus_x:"<<plus<<"cm/s"<<endl;
 			}
 			//if(fabs(velocity[0])<dataList->getStaticWidth())
 			if(dataList->isStatic())
@@ -90,13 +115,13 @@ public:
 			///////ay
 			plus = 0.0f;
 			a = (dataUnit[(i-1+5)%5].getAcc().getY()+dataUnit[i].getAcc().getY())/2;
-			cout<<"cal_ay"<<i<<":"<<a<<endl;
+			//--cout<<"cal_ay"<<i<<":"<<a<<endl;
 			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
 			if(a>=ACC_FILTER_WIDTH||a<=-ACC_FILTER_WIDTH){
 				velocity[1] += (a*g*100*t/1000);
 				
 				plus = a*g*100*t/1000;
-				cout<<"plus_y:"<<plus<<"cm/s"<<endl;
+				//--cout<<"plus_y:"<<plus<<"cm/s"<<endl;
 			}
 			//if(fabs(velocity[0])<dataList->getStaticWidth())
 			if(dataList->isStatic())
@@ -112,13 +137,13 @@ public:
 			///////az
 			plus = 0.0f;			
 			a = (dataUnit[(i-1+5)%5].getAcc().getZ()+dataUnit[i].getAcc().getZ())/2;
-			cout<<"cal_az"<<i<<":"<<a<<endl;
+			//--cout<<"cal_az"<<i<<":"<<a<<endl;
 			t = dataUnit[i].getTime() - dataUnit[(i-1+5)%5].getTime();
 			if(a>=ACC_FILTER_WIDTH||a<=-ACC_FILTER_WIDTH){
 				velocity[2] += (a*g*100*t/1000);
 				
 				plus = a*g*100*t/1000;
-				cout<<"plus_z:"<<plus<<"cm/s"<<endl;
+				//--cout<<"plus_z:"<<plus<<"cm/s"<<endl;
 			}
 			//if(fabs(velocity[0])<dataList->getStaticWidth())
 			if(dataList->isStatic())
@@ -136,7 +161,7 @@ public:
 				out<<dataUnit[i].getAcc().getTotalAcc()<<"\t"<<getVelocity()<<"\t"<<dataUnit[i].getAngular().getZ()<<"\r\n";
 
 		}
-		cout<<"-----------------v0:"<<velocity[0]<<endl;
+		//--cout<<"-----------------v0:"<<velocity[0]<<endl;
 
 		int zCnt = 0;
 		for(int i=0;i<4;++i){
@@ -228,6 +253,7 @@ private:
 	DataUnit dataUnit[5];//dataunit[4] is lastdataunit
 	float zAngle;
 	float modifyShifting[3];
+	float resistance[10];
 };
 
 float DataHandler::velocity[] = {0.0f,0.0f,0.0f};

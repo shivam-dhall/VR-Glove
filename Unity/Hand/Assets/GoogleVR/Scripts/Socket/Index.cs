@@ -12,6 +12,7 @@ public class Index : MonoBehaviour {
     static private Vector3 rotation = new Vector3(0, 0, 0);
     static private Vector3 shifting = new Vector3(0, 0, 0);
     static private bool isInit = false;
+    static private bool isReset = false;
 
     void Awake()
     {
@@ -43,7 +44,7 @@ public class Index : MonoBehaviour {
            
         }
         data = System.Text.Encoding.Default.GetString(a);
-        //Debug.Log("data:" + s);
+        Debug.Log("data:" + s);
         //Debug.Log(data[0]+" "+data[data.Length-1]);
         if (!isInit)
         {
@@ -51,9 +52,15 @@ public class Index : MonoBehaviour {
             //Debug.Log("refer:" + referRotation.x + "," + referRotation.y + "," + referRotation.z);
             isInit = true;
         }
-        shifting.x = dataArray[0] / 100;
-        shifting.y = dataArray[2] / 100;
-        shifting.z = dataArray[1] / 100;
+        if (isReset)
+        {
+            shifting.x = shifting.y = shifting.z = 0.0f;
+            isReset = false;
+        }
+            
+        shifting.x += dataArray[0] / 100;
+        shifting.y += dataArray[2] / 100;
+        shifting.z += dataArray[1] / 100;
 
         rotation.x = dataArray[3]/100;
         rotation.y = dataArray[5]/100;
@@ -61,7 +68,7 @@ public class Index : MonoBehaviour {
         rotation.z = dataArray[4]/100;
         //rotation += referRotation;
         isReady = true;
-        Debug.Log("end");
+        //Debug.Log("end");
     }
 
     static public bool getIsInit()
@@ -96,4 +103,8 @@ public class Index : MonoBehaviour {
         return shifting;
     }
 
+    static public void ResetShifting()
+    {
+        isReset = true;
+    }
 }

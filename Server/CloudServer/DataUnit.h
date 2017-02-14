@@ -89,12 +89,12 @@ private:
 	//
 
 	void _eliminateAcc(){	
-		cout<<"x:"<<acc.getX()<<" y:"<<acc.getY()<<" z:"<<acc.getZ()<<endl;
+		//--cout<<"x:"<<acc.getX()<<" y:"<<acc.getY()<<" z:"<<acc.getZ()<<endl;
 		float temp_g[3];
 		temp_g[0] = 2 * (angle.q[1] * angle.q[3] - angle.q[0] * angle.q[2]);///////////////////   /norm
 		temp_g[1] = 2 * (angle.q[0] * angle.q[1] + angle.q[2] * angle.q[3]);
 		temp_g[2] = angle.q[0] * angle.q[0] - angle.q[1] * angle.q[1] - angle.q[2] * angle.q[2] + angle.q[3] * angle.q[3];
-		cout<<"excellent solution:"<<temp_g[0]<<" "<<temp_g[1]<<" "<<temp_g[2]<<endl;
+		//--cout<<"excellent solution:"<<temp_g[0]<<" "<<temp_g[1]<<" "<<temp_g[2]<<endl;
 		acc.setAcc(acc.x-temp_g[0],acc.y-temp_g[1],acc.z-temp_g[2]);
 	}
 

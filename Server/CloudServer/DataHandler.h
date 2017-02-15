@@ -33,36 +33,55 @@ public:
 	}
 
 	void handleRecvData(ofstream &out,bool isrecord){
+		float refer_resistance[10] = {
+			30000.0f,25000.0f,150000.0f,250000.0f,100000.0f,
+			150000.0f,150000.0f,120000.0f,100000.0f,80000.0f
+		};
+		int time[4];
+		time[0] = recvData[46];
+		time[1] = recvData[46]+recvData[47];
+		time[2] = recvData[46]+recvData[48];
+		time[3] = recvData[46]+recvData[49];
+
 		cout<<"recvdata:";
 		for(int i=0;i<10;++i)
 			cout<<recvData[i]<<" ";
 		cout<<endl;
 		float const_res = 20000.0f;
 		float curr1 = recvData[3]/const_res;
-		resistance[0] = (recvData[2] - recvData[3])/curr1;
-		resistance[1] = (recvData[1] - recvData[2])/curr1;
-		resistance[2] = (recvData[0] - recvData[3])/curr1;
-		resistance[3] = (32767 - recvData[1])/curr1;
+
+		float r[10];
+		r[0] = (recvData[2] - recvData[3])/curr1;
+		r[1] = (recvData[1] - recvData[2])/curr1;
+		r[2] = (recvData[0] - recvData[3])/curr1;
+		r[3] = (27000 - recvData[1])/curr1;
 
 		float curr2 = recvData[9]/const_res;
-		resistance[4] = (recvData[8] - recvData[9])/curr2;
-		resistance[5] = (recvData[7] - recvData[8])/curr2;
-		resistance[6] = (recvData[6] - recvData[7])/curr2;
-		resistance[7] = (recvData[5] - recvData[6])/curr2;
-		resistance[8] = (recvData[4] - recvData[5])/curr2;
-		resistance[9] = (1024 - recvData[4])/curr2;
+		r[4] = (recvData[8] - recvData[9])/curr2;
+		r[5] = (recvData[7] - recvData[8])/curr2;
+		r[6] = (recvData[6] - recvData[7])/curr2;
+		r[7] = (recvData[5] - recvData[6])/curr2;
+		r[8] = (recvData[4] - recvData[5])/curr2;
+		r[9] = (1024 - recvData[4])/curr2;
+
+		 for(int i=0;i<10;++i)
+		// 	if(r[i]<refer_resistance[i]&&r[i]>100)
+			resistance[i] = r[i];
+
+
 
 		cout<<"resistance:";
 		for(int i=0;i<10;++i)
 			cout<<resistance[i]<<" ";
 		cout<<endl;
 
+		out<<time[0]<<"\t";
+		for(int i=0;i<9;++i)
+			out<<resistance[i]<<"\t";
+		out<<resistance[9]<<"\r\n";
 
-		int time[4];
-		time[0] = recvData[46];
-		time[1] = recvData[46]+recvData[47];
-		time[2] = recvData[46]+recvData[48];
-		time[3] = recvData[46]+recvData[49];
+
+
 		for(int i=0;i<4;++i){
 			dataUnit[i] = DataUnit(recvData+(i*9+10),time[i]);
 		}
@@ -106,8 +125,8 @@ public:
 				shifting[0] += (velocity[0]*t/1000);
 				modifyShifting[0] += (velocity[0]*t/1000);
 			}
-			if(isrecord&&out.is_open())
-				out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\t"<<velocity[0]<<"\t"<<shifting[0]<<"\t";//"\t"<<plus<<
+			// if(isrecord&&out.is_open())
+			// 	out<<dataUnit[i].getTime()<<"\t"<<dataUnit[i].getAcc().getX()<<"\t"<<velocity[0]<<"\t"<<shifting[0]<<"\t";//"\t"<<plus<<
 			// dataList->getDataUnitThisLoop(i).setV_X(velocity[0]);
 			// dataList->getDataUnitThisLoop(i).setS_X(shifting[0]);
 
@@ -130,7 +149,7 @@ public:
 				shifting[1] += (velocity[1]*t/1000);
 				modifyShifting[1] += (velocity[1]*t/1000);
 			}
-			out<<dataUnit[i].getAcc().getY()<<"\t"<<velocity[1]<<"\t"<<shifting[1]<<"\t";//"\t"<<plus<<
+			//out<<dataUnit[i].getAcc().getY()<<"\t"<<velocity[1]<<"\t"<<shifting[1]<<"\t";//"\t"<<plus<<
 			// dataList->getDataUnitThisLoop(i).setV_Y(velocity[1]);
 			// dataList->getDataUnitThisLoop(i).setS_Y(shifting[1]);
 
@@ -152,13 +171,13 @@ public:
 				shifting[2] += (velocity[2]*t/1000);
 				modifyShifting[2] += (velocity[2]*t/1000);
 			}
-			out<<dataUnit[i].getAcc().getZ()<<"\t"<<velocity[2]<<"\t"<<shifting[2]<<"\t";//"\t"<<plus<<
+			//out<<dataUnit[i].getAcc().getZ()<<"\t"<<velocity[2]<<"\t"<<shifting[2]<<"\t";//"\t"<<plus<<
 			// dataList->getDataUnitThisLoop(i).setV_Z(velocity[2]);
 			// dataList->getDataUnitThisLoop(i).setS_Z(shifting[2]);
 
 			///////total acc
-			if(isrecord&&out.is_open())
-				out<<dataUnit[i].getAcc().getTotalAcc()<<"\t"<<getVelocity()<<"\t"<<dataUnit[i].getAngular().getZ()<<"\r\n";
+			// if(isrecord&&out.is_open())
+			// 	out<<dataUnit[i].getAcc().getTotalAcc()<<"\t"<<getVelocity()<<"\t"<<dataUnit[i].getAngular().getZ()<<"\r\n";
 
 		}
 		//--cout<<"-----------------v0:"<<velocity[0]<<endl;

@@ -67,8 +67,8 @@ public:
 		 for(int i=0;i<10;++i)
 		// 	if(r[i]<refer_resistance[i]&&r[i]>100)
 			resistance[i] = r[i];
-		//
 		
+
 
 		cout<<"resistance:";
 		for(int i=0;i<10;++i)

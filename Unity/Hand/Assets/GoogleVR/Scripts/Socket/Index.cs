@@ -35,7 +35,7 @@ public class Index : MonoBehaviour {
         //isReady = false;
         string s = "";
         byte[] temp = new byte[4];
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < 11; ++i)
         {
             for (int j = 0; j < 4;++j )
                 temp[j] = a[i * 4 + (3-j)];
@@ -69,6 +69,11 @@ public class Index : MonoBehaviour {
         //rotation += referRotation;
         isReady = true;
         //Debug.Log("end");
+    }
+
+    static public int getFingerState(int i)//i from 0 to 4
+    {
+        return dataArray[i + 6];
     }
 
     static public bool getIsInit()

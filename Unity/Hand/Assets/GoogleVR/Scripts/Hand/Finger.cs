@@ -5,7 +5,7 @@ public class Finger : MonoBehaviour {
 
     public enum FingerType
     {
-        FINGER_THUMB,
+        FINGER_THUMB =0,
         FINGER_INDEX,
         FINGER_MIDDLE,
         FINGER_RING,
@@ -26,6 +26,8 @@ public class Finger : MonoBehaviour {
     //some vars that playing animation need
     int[] toBendState = { 0, 0, 0 };
     int[] animation_times = { 0, 0, 0 };
+
+    int fingerState = 0;//1->bend
 
 	// Use this for initialization
 	void Start () {
@@ -80,7 +82,17 @@ public class Finger : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        GetKeyEvent();
+        //GetKeyEvent();
+        int state = Index.getFingerState((int)type);
+        if (fingerState != state)
+        {
+            fingerState = state;
+            if (fingerState == 0)
+                PlayAnimation(1, 0, 5);
+            else
+                PlayAnimation(1, 6, 5);
+        }
+
 
         for (int i = 0; i < 3; ++i)
         {

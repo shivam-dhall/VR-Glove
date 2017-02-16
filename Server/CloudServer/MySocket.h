@@ -130,17 +130,20 @@ public:
 			else if(cnt<flag)
 				isrecord = true;
 
-			dataHandler.handleRecvData(out,isrecord);
+			dataHandler.handleRecvData(out,isrecord,cnt);
 
 			if(cnt%2==0){
-				int temp[6];
+				int temp[11];
 				float* shift = dataHandler.getModifyShifting();
 				for(int i=0;i<3;++i)
 					temp[i] = (int)(shift[i]*100);
 				temp[3] = (int)(dataHandler.getXAngle()*100);
 				temp[4] = (int)(dataHandler.getYAngle()*100);
 				temp[5] = (int)(dataHandler.getZAngle(cnt)*100);
-				_SendData(connUnity,temp,6,1);
+				int *fingerState = dataHandler.getFingerState();
+				for(int i=0;i<5;++i)
+					temp[6+i] = fingerState[i];
+				_SendData(connUnity,temp,11,1);
 				dataHandler.return2Zero();
 			}
 
@@ -290,7 +293,7 @@ private:
 			cout<<"not connect"<<endl;
 			return;
 		}
-		char bbb[29];
+		char bbb[49];
 		size *= 4;
 
 		bbb[0] = (char)((size >> 24) & 0xFF);

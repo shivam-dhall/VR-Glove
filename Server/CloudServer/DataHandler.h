@@ -21,6 +21,12 @@ public:
 		dataList = DataList::getInstance();
 		zAngle = 0.0f;
 		modifyShifting[0] = modifyShifting[1] = modifyShifting[2] = 0.0f;
+		for(int i = 0;i<10;++i){
+			max_resistance[i] = -1000000.0f;
+			min_resistance[i] = 1000000.0f;
+		}
+		for(int i=0;i<5;++i)
+			fingerState[i] = 0;
 	}
 
 	void setRecvData(int d, int i){
@@ -32,11 +38,11 @@ public:
 			out.close();
 	}
 
-	void handleRecvData(ofstream &out,bool isrecord){
-		float refer_resistance[10] = {
-			30000.0f,25000.0f,150000.0f,250000.0f,100000.0f,
-			150000.0f,150000.0f,120000.0f,100000.0f,80000.0f
-		};
+	void handleRecvData(ofstream &out,bool isrecord,int cnt){
+		// float refer_resistance[10] = {
+		// 	30000.0f,70000.0f,160000.0f,140000.0f,70000.0f,
+		// 	50000.0f,170000.0f,80000.0f,170000.0f,100000.0f
+		// };
 		int time[4];
 		time[0] = recvData[46];
 		time[1] = recvData[46]+recvData[47];
@@ -64,11 +70,31 @@ public:
 		r[8] = (recvData[4] - recvData[5])/curr2;
 		r[9] = (1024 - recvData[4])/curr2;
 
-		 for(int i=0;i<10;++i)
-		// 	if(r[i]<refer_resistance[i]&&r[i]>100)
-			resistance[i] = r[i];
-		
+		// if(cnt<80){
+		// 	for(int i=0;i<10;++i)
+		// 		refer_resistance[i] += r[i];
+		// }
+		// else if(cnt == 80)
+		// 	for(int i=0;i<)
+		if(cnt<80)
+			for(int i=0;i<10;++i){
+				if(r[i]>max_resistance[i])
+					max_resistance[i] = r[i];
+				if(r[i]<min_resistance[i])
+					min_resistance[i] = r[i];
+				refer_resistance[i] += r[i];
+			}
+		else if(cnt==80)
+			for(int i=0;i<10;++i)
+				refer_resistance[i] /= 80;
 
+		for(int i=0;i<10;++i)
+			if(cnt>=80){
+				if(r[i]<max_resistance[i]&&r[i]>1000)
+					resistance[i] = r[i];
+			}
+			else
+				resistance[i] = r[i];
 
 		cout<<"resistance:";
 		for(int i=0;i<10;++i)
@@ -76,9 +102,24 @@ public:
 		cout<<endl;
 
 		out<<time[0]<<"\t";
-		for(int i=0;i<9;++i)
-			out<<resistance[i]<<"\t";
-		out<<resistance[9]<<"\r\n";
+		for(int i=0;i<5;++i)
+			if(resistance[i]<min_resistance[i]*0.95){
+				out<<0<<"\t";
+				fingerState[i] = 1;
+			}
+			else{
+				out<<resistance[i]<<"\t";
+				fingerState[i] = 0;
+			}
+		// if(resistance[9]<min_resistance[9])
+		// 	out<<0<<"\r\n";
+		// else
+		// 	out<<resistance[9]<<"\r\n";
+		//if(cnt>=80)
+		for(int i=0;i<5;++i)
+				out<<(resistance[i]/min_resistance[i])<<"\t";
+		out<<"\r\n";
+		
 
 
 
@@ -195,6 +236,10 @@ public:
 
 	}
 
+	int *getFingerState(){
+		return fingerState;
+	}
+
 
 	float* getModifyShifting(){
 		return modifyShifting;
@@ -273,6 +318,10 @@ private:
 	float zAngle;
 	float modifyShifting[3];
 	float resistance[10];
+	float refer_resistance[10];
+	float max_resistance[10];
+	float min_resistance[10];
+	int fingerState[5];
 };
 
 float DataHandler::velocity[] = {0.0f,0.0f,0.0f};

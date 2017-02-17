@@ -4,7 +4,7 @@
 
 Adafruit_ADS1115 ads(0x48);
 
-char head[14];// = "AT+CIPSEND=153";
+char head[15] = "AT+CIPSEND=153";
 char data[153];
 bool isInit = false;
 
@@ -13,20 +13,6 @@ void setup()
    Serial.begin(115200);
    JY901.StartIIC();
    ads.begin();
-   head[0]='A';
-   head[1]='T';
-   head[2]='+';
-   head[3]='C';
-   head[4]='I';
-   head[5]='P';
-   head[6]='S';
-   head[7]='E';
-   head[8]='N';
-   head[9]='D';
-   head[10]='=';
-   head[11]='1';
-   head[12]='5';
-   head[13]='3';
 
    for(int i=0;i<153;++i)
       data[i]='b';
@@ -129,10 +115,12 @@ void sendRST(){
     char a0[3] = "AT";
     char a1[7] = "AT+RST";
     char a2[12] = "AT+CWMODE=1";
-    //char a3[36] = "AT+CWJAP=\"Ippclub\",\"coseastippclub\"";
-    char a3[26] = "AT+CWJAP=\"IOT\",\"11111111\"";
-    //char a4[39] = "AT+CIPSTART=\"TCP\",\"223.3.156.253\",8080";
-    //char a4[39] = "AT+CIPSTART=\"TCP\",\"192.168.191.1\",8080";
+    char a3[36] = "AT+CWJAP=\"Ippclub\",\"coseastippclub\"";
+    //char a3[27] = "AT+CWJAP=\"FAST\",\"12345678\"";
+    //char a3[26] = "AT+CWJAP=\"IOT\",\"12345678\"";
+    //char a3[26] = "AT+CWJAP=\"IOT\",\"11111111\"";
+    ////char a4[39] = "AT+CIPSTART=\"TCP\",\"223.3.156.253\",8080";
+    ////char a4[39] = "AT+CIPSTART=\"TCP\",\"192.168.191.1\",8080";
     char a4[40] = "AT+CIPSTART=\"TCP\",\"101.200.45.113\",8080";
   
     Serial.print(a3);
@@ -164,12 +152,12 @@ void jy901(int t){
    
     JY901.GetGyro();  
     for(int j = 3;j<6;++j){
-      temp[j] = JY901.stcGyro.w[j];
+      temp[j] = JY901.stcGyro.w[j-3];
     }
 
     JY901.GetAngle();
     for(int j = 6;j<9;++j){
-      temp[j] = JY901.stcAngle.Angle[j];
+      temp[j] = JY901.stcAngle.Angle[j-6];
     }
 
     int first = 10+t*9;

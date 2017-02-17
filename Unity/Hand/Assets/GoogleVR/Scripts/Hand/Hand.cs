@@ -109,7 +109,7 @@ public class Hand : MonoBehaviour {
         if (Index.IsReady())
         {
             Vector3 s = Index.getShifting();
-            hand.transform.position += getShiftVec(s.x, ShiftingType.X);
+            //hand.transform.position += getShiftVec(s.x, ShiftingType.X);
             Index.ResetShifting();
             //hand.transform.localPosition;
             //hand.transform.position += getShiftVec(s.y, ShiftingType.Y);

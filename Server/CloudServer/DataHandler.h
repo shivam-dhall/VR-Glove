@@ -13,6 +13,7 @@ using namespace std;
 #define ACC_FILTER_WIDTH 0.0009
 #define V_FILTER_WIDTH 0.5
 #define ZAngle_FILTER_WIDTH 1.8
+#define CNT 40
 
 class DataHandler{
 public:
@@ -70,13 +71,7 @@ public:
 		r[8] = (recvData[4] - recvData[5])/curr2;
 		r[9] = (1024 - recvData[4])/curr2;
 
-		// if(cnt<80){
-		// 	for(int i=0;i<10;++i)
-		// 		refer_resistance[i] += r[i];
-		// }
-		// else if(cnt == 80)
-		// 	for(int i=0;i<)
-		if(cnt<80)
+		if(cnt<CNT)
 			for(int i=0;i<10;++i){
 				if(r[i]>max_resistance[i])
 					max_resistance[i] = r[i];
@@ -84,18 +79,18 @@ public:
 					min_resistance[i] = r[i];
 				refer_resistance[i] += r[i];
 			}
-		else if(cnt==80)
+		else if(cnt==CNT)
 			for(int i=0;i<10;++i)
-				refer_resistance[i] /= 80;
+				refer_resistance[i] /= CNT;
 
 		for(int i=0;i<10;++i)
-			if(cnt>=80){
+			if(cnt>=CNT){
 				if(r[i]<max_resistance[i]&&r[i]>1000)
 					resistance[i] = r[i];
 			}
 			else
 				resistance[i] = r[i];
-
+			
 		cout<<"resistance:";
 		for(int i=0;i<10;++i)
 			cout<<resistance[i]<<" ";
@@ -115,7 +110,7 @@ public:
 		// 	out<<0<<"\r\n";
 		// else
 		// 	out<<resistance[9]<<"\r\n";
-		//if(cnt>=80)
+		//if(cnt>=CNT)
 		for(int i=0;i<5;++i)
 				out<<(resistance[i]/min_resistance[i])<<"\t";
 		out<<"\r\n";

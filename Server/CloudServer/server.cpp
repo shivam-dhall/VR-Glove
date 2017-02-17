@@ -56,13 +56,22 @@ void *threadFunc1(void *arg){
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
+	bool isUnityConnect = false;
+	cout<<"argc:"<<argc<<endl;
+	for(int i=0;i<argc;++i)
+		printf("option: %s\n", argv[i]);
+	if(argv[1][0]=='1'){
+		cout<<"true"<<endl;
+		isUnityConnect;
+	}
 
 	sock = MySocket::getInstance();
 	sock->OpenPort();
 	sock->WaitClient();
-	sock->WaitClient();
+	if(isUnityConnect)
+		sock->WaitClient();
 		
 	pthread_t tid1;
 	int err;

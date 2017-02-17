@@ -78,7 +78,7 @@ namespace clinet
                     handler = state.workSocket;
                     int bytesRead = handler.EndReceive(ar);
                     int readCnt = 0;//the length of data which has been read in this callback func
-                    Index.print("receive:" + bytesRead);
+                    //Index.print("receive:" + bytesRead);
                     if (bytesRead > 0)
                     {
                         if (state.cnt + bytesRead < 5)
@@ -230,7 +230,7 @@ namespace clinet
                 if (this.isOnceFinished)
                 {
                     this.isOnceFinished = false;
-                    ClientSocket.BeginReceive(Cstate.buffer, 0, 29, 0,
+                    ClientSocket.BeginReceive(Cstate.buffer, 0, 49, 0,
                     new AsyncCallback(ReceiveCallback), Cstate);
                 }
             }

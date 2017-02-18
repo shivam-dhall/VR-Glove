@@ -106,6 +106,32 @@ public class Hand : MonoBehaviour {
 
     public void SetXYZPosition()
     {
+        if (Input.GetKey(KeyCode.Q))//<- X
+        {
+            
+        }
+        else if (Input.GetKey(KeyCode.W))//X->
+        {
+            
+        }
+        else if (Input.GetKey(KeyCode.A))//<- Y
+        {
+            
+        }
+        else if (Input.GetKey(KeyCode.S))//Y->
+        {
+            
+        }
+        else if (Input.GetKey(KeyCode.Z))//<- Z
+        {
+            
+        }
+        else if (Input.GetKey(KeyCode.X))//Z->
+        {
+            
+        }
+            
+
         if (Index.IsReady())
         {
             Vector3 s = Index.getShifting();

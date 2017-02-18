@@ -183,24 +183,24 @@ public class Finger : MonoBehaviour {
 
     void GetKeyEvent()
     {
+        //Debug.Log("-----------");
         int x = -1;
-        if (Input.GetKey(KeyCode.Alpha1))
-        {
-            x = (int)KeyCode.Alpha1;
-            //Debug.Log("111");
-        }
-        else if (Input.GetKey(KeyCode.Alpha2))
-        {
-            //Debug.Log("222");
+        if (Input.GetKey(KeyCode.Alpha1))//49
+             x = (int)KeyCode.Alpha1;
+        else if (Input.GetKey(KeyCode.Alpha2))//50
             x = (int)KeyCode.Alpha2;
-        }
-            
-        
+        else if (Input.GetKey(KeyCode.Alpha3))
+            x = (int)KeyCode.Alpha3;
+        else if (Input.GetKey(KeyCode.Alpha4))
+            x = (int)KeyCode.Alpha4;
+        else if (Input.GetKey(KeyCode.Alpha5))
+            x = (int)KeyCode.Alpha5;
+   
         if (x != -1)
         {
             if (lastKey != x)
             {
-                Debug.Log(x);
+                
             }
             lastKey = x;
         }

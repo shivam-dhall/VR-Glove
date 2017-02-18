@@ -28,6 +28,7 @@ public class Finger : MonoBehaviour {
     int[] animation_times = { 0, 0, 0 };
 
     int fingerState = 0;//1->bend
+    int lastKey = -1;
 
 	// Use this for initialization
 	void Start () {
@@ -82,16 +83,17 @@ public class Finger : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        //GetKeyEvent();
-        int state = Index.getFingerState((int)type);
-        if (fingerState != state)
-        {
-            fingerState = state;
-            if (fingerState == 0)
-                PlayAnimation(1, 0, 5);
-            else
-                PlayAnimation(1, 6, 5);
-        }
+        GetKeyEvent();
+        //int state = Index.getFingerState((int)type);
+        //if (fingerState != state)
+        //{
+        //    fingerState = state;
+        //    if (fingerState == 0)
+        //        PlayAnimation(1, 0, 5);
+        //    else
+        //        PlayAnimation(1, 6, 5);
+        //}
+
 
 
         for (int i = 0; i < 3; ++i)
@@ -182,46 +184,69 @@ public class Finger : MonoBehaviour {
     void GetKeyEvent()
     {
         int x = -1;
-        if (Input.GetKey(KeyCode.A))
-            x = (int)KeyCode.A;
-        else if (Input.GetKey(KeyCode.B))
-            x = (int)KeyCode.B;
-        else if (Input.GetKey(KeyCode.C))
-            x = (int)KeyCode.C;
-        else if (Input.GetKey(KeyCode.D))
-            x = (int)KeyCode.D;
-        else if (Input.GetKey(KeyCode.E))
-            x = (int)KeyCode.E;
-        else if (Input.GetKey(KeyCode.F))
-            x = (int)KeyCode.F;
-        else if (Input.GetKey(KeyCode.G))
-            x = (int)KeyCode.G;
-        else if (Input.GetKey(KeyCode.H))
-            x = (int)KeyCode.H;
-        else if (Input.GetKey(KeyCode.I))
-            x = (int)KeyCode.I;
-        else if (Input.GetKey(KeyCode.J))
-            x = (int)KeyCode.J;
-        else if (Input.GetKey(KeyCode.K))
-            x = (int)KeyCode.K;
-        else if (Input.GetKey(KeyCode.L))
-            x = (int)KeyCode.L;
-        else if (Input.GetKey(KeyCode.M))
-            x = (int)KeyCode.M;
-        else if (Input.GetKey(KeyCode.N))
-            x = (int)KeyCode.N;
-
-        x = x - 97;//ABCDEFG  HIJKLMN
-        if (x >= 0 && x <= 13)
+        if (Input.GetKey(KeyCode.Alpha1))
         {
-            if (type == FingerType.FINGER_THUMB)
-                PlayAnimation(1, x%7, 5);
-            else
-            {
-                //int x1 = x / 7;
-                int x2 = x % 7;
-                PlayAnimation(1, x2, 5);
-            }
+            x = (int)KeyCode.Alpha1;
+            //Debug.Log("111");
         }
+        else if (Input.GetKey(KeyCode.Alpha2))
+        {
+            //Debug.Log("222");
+            x = (int)KeyCode.Alpha2;
+        }
+            
+        
+        if (x != -1)
+        {
+            if (lastKey != x)
+            {
+                Debug.Log(x);
+            }
+            lastKey = x;
+        }
+            
+            
+        //int x = -1;
+        //if (Input.GetKey(KeyCode.A))
+        //    x = (int)KeyCode.A;
+        //else if (Input.GetKey(KeyCode.B))
+        //    x = (int)KeyCode.B;
+        //else if (Input.GetKey(KeyCode.C))
+        //    x = (int)KeyCode.C;
+        //else if (Input.GetKey(KeyCode.D))
+        //    x = (int)KeyCode.D;
+        //else if (Input.GetKey(KeyCode.E))
+        //    x = (int)KeyCode.E;
+        //else if (Input.GetKey(KeyCode.F))
+        //    x = (int)KeyCode.F;
+        //else if (Input.GetKey(KeyCode.G))
+        //    x = (int)KeyCode.G;
+        //else if (Input.GetKey(KeyCode.H))
+        //    x = (int)KeyCode.H;
+        //else if (Input.GetKey(KeyCode.I))
+        //    x = (int)KeyCode.I;
+        //else if (Input.GetKey(KeyCode.J))
+        //    x = (int)KeyCode.J;
+        //else if (Input.GetKey(KeyCode.K))
+        //    x = (int)KeyCode.K;
+        //else if (Input.GetKey(KeyCode.L))
+        //    x = (int)KeyCode.L;
+        //else if (Input.GetKey(KeyCode.M))
+        //    x = (int)KeyCode.M;
+        //else if (Input.GetKey(KeyCode.N))
+        //    x = (int)KeyCode.N;
+
+        //x = x - 97;//ABCDEFG  HIJKLMN
+        //if (x >= 0 && x <= 13)
+        //{
+        //    if (type == FingerType.FINGER_THUMB)
+        //        PlayAnimation(1, x%7, 5);
+        //    else
+        //    {
+        //        //int x1 = x / 7;
+        //        int x2 = x % 7;
+        //        PlayAnimation(1, x2, 5);
+        //    }
+        //}
     }
 }

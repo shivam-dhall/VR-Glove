@@ -108,28 +108,29 @@ public class Hand : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.Q))//<- X
         {
-            
+            hand.transform.position += getShiftVec(-1, ShiftingType.X);
         }
         else if (Input.GetKey(KeyCode.W))//X->
         {
-            
+            hand.transform.position += getShiftVec(1, ShiftingType.X);
         }
         else if (Input.GetKey(KeyCode.A))//<- Y
         {
-            
+            hand.transform.position += getShiftVec(-1, ShiftingType.Y);
         }
         else if (Input.GetKey(KeyCode.S))//Y->
         {
-            
+            hand.transform.position += getShiftVec(1, ShiftingType.Y);
         }
         else if (Input.GetKey(KeyCode.Z))//<- Z
         {
-            
+            hand.transform.position += getShiftVec(-1, ShiftingType.Z);
         }
         else if (Input.GetKey(KeyCode.X))//Z->
         {
-            
+            hand.transform.position += getShiftVec(1, ShiftingType.Z);
         }
+        
             
 
         if (Index.IsReady())

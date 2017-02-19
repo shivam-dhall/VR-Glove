@@ -82,8 +82,12 @@ public class Finger : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
+        //if(type == FingerType.FINGER_THUMB)
         GetKeyEvent();
+        if (fingerState == 0)
+            PlayAnimation(1, 0, 5);
+        else
+            PlayAnimation(1, 6, 5);
         //int state = Index.getFingerState((int)type);
         //if (fingerState != state)
         //{
@@ -200,7 +204,33 @@ public class Finger : MonoBehaviour {
         {
             if (lastKey != x)
             {
-                
+                Debug.Log("x:" + x);
+                int _x = x - 49;
+                if (_x == 0)//1
+                {
+                    int[] arr = new int[5] { 1, 0, 1, 1, 1 };
+                    SetFingerState(arr, 5);
+                }
+                else if (_x == 1)//2
+                {
+                    int[] arr = new int[5] { 1, 0, 0, 1, 1 };
+                    SetFingerState(arr, 5);
+                }
+                else if (_x == 2)//3
+                {
+                    int[] arr = new int[5] { 1, 1, 0, 0, 0 };
+                    SetFingerState(arr, 5);
+                }
+                else if (_x == 3)//4
+                {
+                    int[] arr = new int[5] { 1, 0, 0, 0, 0 };
+                    SetFingerState(arr, 5);
+                }
+                else if (_x == 4)//5
+                {
+                    int[] arr = new int[5] { 0, 0, 0, 0, 0 };
+                    SetFingerState(arr, 5);
+                }
             }
             lastKey = x;
         }
@@ -248,5 +278,12 @@ public class Finger : MonoBehaviour {
         //        PlayAnimation(1, x2, 5);
         //    }
         //}
+    }
+
+    void SetFingerState(int[]arr,int size)
+    {
+        for (int i = 0; i < size; ++i)
+            if ((int)type == i)
+                fingerState = arr[i];
     }
 }

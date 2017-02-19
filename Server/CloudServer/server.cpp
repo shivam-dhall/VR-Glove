@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 		printf("option: %s\n", argv[i]);
 	if(argv[1][0]=='1'){
 		cout<<"true"<<endl;
-		isUnityConnect;
+		isUnityConnect = true;
 	}
 
 	sock = MySocket::getInstance();

@@ -2,7 +2,7 @@
 using System.Collections;
 
 public class rotate : MonoBehaviour {
-
+    public GameObject cube;
     GameObject obj;
     GameObject refer;
 

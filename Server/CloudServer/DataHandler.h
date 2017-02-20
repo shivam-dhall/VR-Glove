@@ -41,6 +41,7 @@ public:
 
 	void handleRecvData(ofstream &out,bool isrecord,int cnt){
 		//
+		//
 		// float refer_resistance[10] = {
 		// 	30000.0f,70000.0f,160000.0f,140000.0f,70000.0f,
 		// 	50000.0f,170000.0f,80000.0f,170000.0f,100000.0f

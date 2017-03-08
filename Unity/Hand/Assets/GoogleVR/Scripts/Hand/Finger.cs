@@ -88,14 +88,22 @@ public class Finger : MonoBehaviour {
             PlayAnimation(1, 0, 5);
         else
             PlayAnimation(1, 6, 5);
+
+
         //int state = Index.getFingerState((int)type);
         //if (fingerState != state)
         //{
+        //    Hand.SetFingerState((int)type, state);
         //    fingerState = state;
-        //    if (fingerState == 0)
+        //    if (fingerState == 0){
         //        PlayAnimation(1, 0, 5);
+        //    }
+
         //    else
+        //    {
         //        PlayAnimation(1, 6, 5);
+        //    }
+               
         //}
 
 
@@ -229,6 +237,16 @@ public class Finger : MonoBehaviour {
                 else if (_x == 4)//5
                 {
                     int[] arr = new int[5] { 0, 0, 0, 0, 0 };
+                    SetFingerState(arr, 5);
+                }
+                else if (_x == 5)//6
+                {
+                    int[] arr = new int[5] { 1, 0, 0, 0, 1 };
+                    SetFingerState(arr, 5);
+                }
+                else if (_x == 6)//7
+                {
+                    int[] arr = new int[5] { 1, 1, 1, 1, 1 };
                     SetFingerState(arr, 5);
                 }
             }
